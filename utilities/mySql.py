@@ -1,10 +1,15 @@
-import sqlite3
+import mysql.connector
 
 
-class MySql:
-    def __init__(self, dbPath):
-        self.db = self.createConnection(dbPath)  # connect to the DB
-        self.manager = self.db.cursor()          # manager with access to the DB
+class MySqlConnector:
+    def __init__(self, host, user, password, database):
+        self.db_connection = mysql.connector.connect(
+            host=host,
+            user=user,
+            password=password,
+            database=database)
+        self.manager = self.db_connection.cursor(
+            buffered=True)  # manager with access to the DB
 
     def createConnection(self, dbFilePath):
         try:
@@ -17,7 +22,7 @@ class MySql:
             return e
 
     def closeConnection(self):
-        self.db.close()
+        self.db_connection.close()
 
     def createTable(self, tableName, columns):
         # Build query
@@ -35,7 +40,7 @@ class MySql:
         query = "insert into " + tableName + " values (?,?)"
         try:
             self.manager.execute(query, rowData)    # Execute query
-            self.db.commit()                        # Save changes
+            self.db_connection.commit()                        # Save changes
         except sqlite3.Error as err:
             raise ValueError(err)
 
@@ -74,10 +79,3 @@ class MySql:
     def deleteRow(self, tableName, condition):
         query = "DELETE FROM " + tableName + " WHERE " + condition
         self.executeQuery(query)
-
-# dbFilePath = "chatMessages.db" # Set db path to current directory
-##dbObject = sqlLiteDataBase(dbFilePath)
-# dbObject.createTable(dbObject.messagesTable,["sourceUser","destinationUser","date","message"])
-# dbObject.insertRowToTable(dbObject.messagesTable,("daniel","huri","datenow","hey"))
-##print (dbObject.executeQuery("select * from " + dbObject.messagesTable))
-# dbObject.closeConnection()

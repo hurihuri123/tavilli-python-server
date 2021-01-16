@@ -1,10 +1,11 @@
-from utilities.mySql import MySql
+from utilities.mySql import MySqlConnector
 from utilities.queries import Queries
 from algorithms.match import match
+from config.config import *
 
 if __name__ == "__main__":
-    # Get all offers related to category
-    database = MySql("")
+    database = MySqlConnector(
+        DATABASE_HOST, DATABASE_USERNAME, DATEBASE_PASSWORD, DATABASE_NAME)
     offers = database.executeQuery(Queries.getOffers())
     requests = database.executeQuery(Queries.getRequests())
     matches = []

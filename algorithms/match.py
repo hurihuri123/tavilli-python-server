@@ -10,4 +10,4 @@ def match(request, offer):
     description_match = calculateTextMatch(
         request.description, offer.description)
 
-    return calculateMatch(description_match)
+    return calculateMatch(description_match, 100)
