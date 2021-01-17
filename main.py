@@ -13,7 +13,7 @@ if __name__ == "__main__":
     for request in requests:
         for offer in offers:
             match = Match(request, offer)
-            if(match.calculate() > 70):
+            if(match.matchPercantage > 70):
                 matches.append(match)
 
     for match in matches:
