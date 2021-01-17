@@ -1,13 +1,19 @@
 from algorithms.textMatch import calculateTextMatch
+from utilities.queries import *
 
 
-# TODO create class
-def calculateMatch(descriptionMatch, imageMatch):
-    return 100
+class Match(object):
+    def __init__(self, request, offer):
+        self.request = request
+        self.offer = offer
+        self.matchPercantage = 0
 
+    def calculate(self):
+        description_match = calculateTextMatch(
+            self.request[DESCRIPTION_FIELD], self.offer[DESCRIPTION_FIELD])
 
-def match(request, offer):
-    description_match = calculateTextMatch(
-        request.description, offer.description)
+        self.matchPercantage = description_match
+        return self.matchPercantage
 
-    return calculateMatch(description_match, 100)
+    def __str__(self):
+        return "requestId {}, offerId {} has {}% match".format(self.request[ID_FIELD], self.offer[ID_FIELD], self.matchPercantage)

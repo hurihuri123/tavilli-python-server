@@ -1,6 +1,6 @@
 from utilities.mySql import MySqlConnector
 from utilities.queries import Queries, OFFERS_TABLE, REQUESTS_TABLE, MATCH_FIELDS
-from algorithms.match import match
+from algorithms.match import Match
 from config.config import *
 
 if __name__ == "__main__":
@@ -12,8 +12,9 @@ if __name__ == "__main__":
 
     for request in requests:
         for offer in offers:
-            matchPercentage = match(request, offer)
-            if(matchPercentage > 70):
-                matches.append({offer, request, matchPercentage})
+            match = Match(request, offer)
+            if(match.calculate() > 70):
+                matches.append(match)
 
-    print(matches)
+    for match in matches:
+        print(match)

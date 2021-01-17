@@ -2,6 +2,12 @@ import mysql.connector
 from mysql.connector import errorcode
 
 
+def convertQueryResultToDict(queryResult, description):
+    column_names = [col[0] for col in description]
+    return [dict(zip(column_names, row))
+            for row in queryResult]
+
+
 class MySqlConnector:
     def __init__(self, host, user, password, database):
         self.db_connection = self.createConnection(
@@ -31,6 +37,7 @@ class MySqlConnector:
     def closeConnection(self):
         self.db_connection.close()
 
-    def executeQuery(self, query):
+    def executeQuery(self, query, toDict=True):
         self.cursor.execute(query)
-        return self.cursor.fetchall()
+        result = self.cursor.fetchall()
+        return convertQueryResultToDict(result, self.cursor.description) if toDict else result

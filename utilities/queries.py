@@ -4,7 +4,14 @@ from config.config import DATABASE_NAME
 OFFERS_TABLE = "offers"
 REQUESTS_TABLE = "requests"
 
-MATCH_FIELDS = "id,ownerId,title,images,price"
+DESCRIPTION_FIELD = "description"
+IMAGES_FIELD = "images"
+TITLE_FIELD = "title"
+PRICE_FIELD = "price"
+ID_FIELD = "id"
+
+MATCH_FIELDS = "{},ownerId,{},{},{},{}".format(
+    DESCRIPTION_FIELD, IMAGES_FIELD, TITLE_FIELD, PRICE_FIELD, ID_FIELD)
 
 
 class Queries():
