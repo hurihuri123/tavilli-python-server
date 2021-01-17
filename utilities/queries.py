@@ -15,6 +15,7 @@ MATCH_FIELDS = "{},ownerId,{},{},{},{}".format(
 
 
 class Queries():
+    # TODO: filter by category
     @staticmethod
     def getOffers(autoSubmit=True):
         return "SELECT {} FROM {} WHERE autoSubmit = {}".format(MATCH_FIELDS, OFFERS_TABLE, autoSubmit)
