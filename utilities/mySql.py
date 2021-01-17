@@ -1,25 +1,32 @@
 import mysql.connector
+from mysql.connector import errorcode
 
 
 class MySqlConnector:
     def __init__(self, host, user, password, database):
-        self.db_connection = mysql.connector.connect(
-            host=host,
-            user=user,
-            password=password,
-            database=database)
-        self.manager = self.db_connection.cursor(
-            buffered=True)  # manager with access to the DB
+        self.db_connection = self.createConnection(
+            host, user, password, database)
+        if self.db_connection:
+            self.cursor = self.db_connection.cursor(
+                buffered=True)  # cursor with access to the DB
 
-    def createConnection(self, dbFilePath):
+    def createConnection(self, host, user, password, database):
         try:
-            # NOTE -  SQLite creates a new database if db file doesn't exsists
-            conn = sqlite3.connect(dbFilePath)
+            conn = mysql.connector.connect(
+                host=host,
+                user=user,
+                password=password,
+                database=database)
             print("Connected successfully to DB")
             return conn
-        except Error as e:
-            print(e)
-            return e
+        except mysql.connector.Error as err:
+            if err.errno == errorcode.ER_ACCESS_DENIED_ERROR:
+                print("Something is wrong with your user name or password")
+            elif err.errno == errorcode.ER_BAD_DB_ERROR:
+                print("Database does not exist")
+            else:
+                print(err)
+            return None
 
     def closeConnection(self):
         self.db_connection.close()
@@ -33,19 +40,20 @@ class MySqlConnector:
         query += ")"
 
         # Execute query
-        self.manager.execute(query)
+        self.cursor.execute(query)
 
     def insertRowToTable(self, tableName, rowData, columns):
         # Build query
         query = "insert into " + tableName + " values (?,?)"
         try:
-            self.manager.execute(query, rowData)    # Execute query
+            self.cursor.execute(query, rowData)    # Execute query
             self.db_connection.commit()                        # Save changes
-        except sqlite3.Error as err:
+        except mysql.connector.Error as err:
             raise ValueError(err)
 
     def executeQuery(self, query):
-        return self.manager.execute(query).fetchall()
+        self.cursor.execute(query)
+        return self.cursor.fetchall()
 
     def testTableExistence(self, tableName):
         query = "SELECT 1 FROM " + tableName + " LIMIT 1;"
