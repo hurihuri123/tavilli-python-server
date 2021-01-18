@@ -54,24 +54,35 @@ def getImageOutline(maskedImage):
     return outline
 
 
-def indexDataset(sourcePath, resultPath):
+def indexDataset(dirPath):
     # Variable Definition
     resultIndexes = {}
 
     # Initialize a descriptor
     descriptor = ImageDescriptor(21)
 
-    for imagePath in list_images(sourcePath):
+    for imagePath in list_images(dirPath):
         imageName = ntpath.basename(imagePath)
         image = getImageMask(imagePath)
         outlilne = getImageOutline(image)
 
         resultIndexes[imageName] = descriptor.describeByShape(outlilne)
-        print(resultIndexes[imageName].shape)
+
+    return
 
 
 dirname = os.path.dirname(__file__)
-sourceDir = os.path.join(dirname, "testImages")
-destDir = os.path.join(dirname, "result")
-indexDataset(sourceDir, destDir)
+dirPath = os.path.join(dirname, "testImages")
+resultFolder = os.path.join(dirname, "indexedImages")
+
+imagesVectors = indexDataset(dirPath)
+
+# TODO: generic create/open folder and write bytes function
+if not os.path.exists(resultFolder):
+    os.makedirs(resultFolder)
+f = open(resultFolder, "wb")
+f.write(pickle.dumps(imagesVectors))
+f.close()
+
+
 print("done")
