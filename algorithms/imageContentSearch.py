@@ -8,10 +8,30 @@ import imutils
 import cv2
 import os
 import ntpath
-from utilities.helper import writeBinaryToFile, readBinaryFromFile
 
 # Imports for comparing algorithm
 from scipy.spatial import distance as dist
+
+# Global imports
+import sys
+# from utilities.helper import Helper
+
+INDEX_IMAGE_RADIUS = 21
+
+
+# TODO - use this function from 'utilities' (will work when starting module from main)
+def writeBinaryToFile(filePath, data):
+    f = open(filePath, "wb")
+    f.write(data)
+    f.close()
+
+
+def readBinaryFromFile(filePath):
+    f = open(filePath, "rb")
+    data = f.read()
+    f.close()
+    return data
+# -----------
 
 
 class ImageDescriptor:
@@ -62,22 +82,34 @@ def getImageOutline(maskedImage):
     return outline
 
 
-def indexDataset(dirPath):
+def getShapeIndex(imagePath, descriptorCallback):
+    resultIndex = None
+    image = getImageMask(imagePath)
+    outlilne = getImageOutline(image)
+
+    try:
+        resultIndex = descriptorCallback(outlilne)
+    except Exception as err:
+        # Probably too large image for our system (under linux we can set a flag to prevent this issue)
+        print("Error indexing image {} , err: {}".format(imagePath, err))
+    finally:
+        return resultIndex
+
+
+def indexDataset(dirPath, radius):
     # Variable Definition
     resultIndexes = {}
 
     # Initialize a descriptor
-    descriptor = ImageDescriptor(21)
+    descriptor = ImageDescriptor(radius)
 
     for imagePath in list_images(dirPath):
         imageName = ntpath.basename(imagePath)
-        image = getImageMask(imagePath)
-        outlilne = getImageOutline(image)
-        try:
-            resultIndexes[imageName] = descriptor.describeByShape(outlilne)
-        except Exception as err:
-            # Probably too large image for our system (under linux we can set a flag to prevent this issue)
-            print("Error indexing image {} , err: {}".format(imageName, err))
+        index = getShapeIndex(
+            imagePath, descriptor.describeByShape)
+
+        if index is not None:
+            resultIndexes[imageName] = index
 
     return resultIndexes
 
@@ -104,14 +136,22 @@ class Searcher:
         return results
 
 
+# TODO - think about the right modules organization for maximum abstraction and future easy uses
 dirname = os.path.dirname(__file__)
 dirPath = os.path.join(dirname, "testImages")
+queryImagePath = os.path.join(dirPath, "ball.jpg")
 resultIndex = os.path.join(dirname, "imagesIndexes")
 
-imagesVectors = indexDataset(dirPath)
+imagesVectors = indexDataset(dirPath, INDEX_IMAGE_RADIUS)
 writeBinaryToFile(resultIndex, pickle.dumps(imagesVectors))
 
 loadedIndex = readBinaryFromFile(resultIndex)
 loadedIndex = pickle.loads(loadedIndex)
 
-print("done")
+descriptor = ImageDescriptor(INDEX_IMAGE_RADIUS)
+queryFeatures = getShapeIndex(queryImagePath, descriptor.describeByShape)
+
+searchInstance = Searcher(loadedIndex)
+result = searchInstance.search(queryFeatures)
+
+print(result)
