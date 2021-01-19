@@ -81,14 +81,11 @@ def indexDataset(dirPath):
 
 dirname = os.path.dirname(__file__)
 dirPath = os.path.join(dirname, "testImages")
-resultFolder = os.path.join(dirname, "indexedImages")
+resultIndex = os.path.join(dirname, "imagesIndexes")
 
 imagesVectors = indexDataset(dirPath)
 
-# TODO: generic create/open folder and write bytes function
-if not os.path.exists(resultFolder):
-    os.makedirs(resultFolder)
-f = open(resultFolder, "wb")
+f = open(resultIndex, "wb")
 f.write(pickle.dumps(imagesVectors))
 f.close()
 
