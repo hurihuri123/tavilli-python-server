@@ -44,10 +44,14 @@ def getImageOutline(maskedImage):
     thresh = cv2.bitwise_not(maskedImage)
     thresh[thresh > 0] = 255
 
+    # Create a blanck image to store our outline
     outline = np.zeros(maskedImage.shape, dtype="uint8")
+    # Find the outermost contours
     cnts = cv2.findContours(thresh.copy(), cv2.RETR_EXTERNAL,
                             cv2.CHAIN_APPROX_SIMPLE)
+    # handles parsing the contours for various versions of OpenCV.
     cnts = imutils.grab_contours(cnts)
+    # sort contours descending order and keep the largest
     cnts = sorted(cnts, key=cv2.contourArea, reverse=True)[0]
     cv2.drawContours(outline, [cnts], -1, 255, -1)
 
@@ -64,11 +68,15 @@ def indexDataset(dirPath):
     for imagePath in list_images(dirPath):
         imageName = ntpath.basename(imagePath)
         image = getImageMask(imagePath)
+        height, width = image.shape
         outlilne = getImageOutline(image)
+        try:
+            resultIndexes[imageName] = descriptor.describeByShape(outlilne)
+        except Exception as err:
+            # Probably too large image for our system (under linux we can set a flag to prevent this issue)
+            print("Error indexing image {} , err: {}".format(imageName, err))
 
-        resultIndexes[imageName] = descriptor.describeByShape(outlilne)
-
-    return
+    return resultIndexes
 
 
 dirname = os.path.dirname(__file__)
