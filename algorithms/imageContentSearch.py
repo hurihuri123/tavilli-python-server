@@ -8,6 +8,10 @@ import imutils
 import cv2
 import os
 import ntpath
+from utilities.helper import writeBinaryToFile, readBinaryFromFile
+
+# Imports for comparing algorithm
+from scipy.spatial import distance as dist
 
 
 class ImageDescriptor:
@@ -68,7 +72,6 @@ def indexDataset(dirPath):
     for imagePath in list_images(dirPath):
         imageName = ntpath.basename(imagePath)
         image = getImageMask(imagePath)
-        height, width = image.shape
         outlilne = getImageOutline(image)
         try:
             resultIndexes[imageName] = descriptor.describeByShape(outlilne)
@@ -79,15 +82,36 @@ def indexDataset(dirPath):
     return resultIndexes
 
 
+class Searcher:
+    def __init__(self, index):
+        super().__init__()
+        # store the pre-computed features index that we will be searching over
+        self.index = index
+
+    def search(self, queryFeatures):
+        results = {}
+
+        # loop over the images in our index
+        for(k, features) in self.index.items():
+            # compute the distance between the query features
+            # and features in our index, then update the results
+            d = dist.euclidean(queryFeatures, features)
+            results[k] = d
+
+            # sort our results, where a smaller distance indicates higher similarity
+        results = sorted([(v, k) for (k, v) in results.items()])
+
+        return results
+
+
 dirname = os.path.dirname(__file__)
 dirPath = os.path.join(dirname, "testImages")
 resultIndex = os.path.join(dirname, "imagesIndexes")
 
 imagesVectors = indexDataset(dirPath)
+writeBinaryToFile(resultIndex, pickle.dumps(imagesVectors))
 
-f = open(resultIndex, "wb")
-f.write(pickle.dumps(imagesVectors))
-f.close()
-
+loadedIndex = readBinaryFromFile(resultIndex)
+loadedIndex = pickle.loads(loadedIndex)
 
 print("done")
