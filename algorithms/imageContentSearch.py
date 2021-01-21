@@ -52,6 +52,7 @@ class ImageDescriptor:
 # Create a thresholded image
 def getImageMask(imagePath):
     image = cv2.imread(imagePath)
+    image = cv2.resize(image, (64, 64))
     # convert it to grayscale
     image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
     # pad the image with extra white pixels to ensure the
@@ -109,6 +110,7 @@ def indexDataset(dirPath, radius):
             imagePath, descriptor.describeByShape)
 
         if index is not None:
+            print(index)
             resultIndexes[imageName] = index
 
     return resultIndexes
@@ -136,10 +138,17 @@ class Searcher:
         return results
 
 
+def showImage(imPath, name="result-image"):
+    image = cv2.imread(os.path.join(dirPath, imPath))
+    image = cv2.resize(image, (600, 600))
+    cv2.imshow(name, image)
+
+
 # TODO - think about the right modules organization for maximum abstraction and future easy uses
 dirname = os.path.dirname(__file__)
 dirPath = os.path.join(dirname, "testImages")
-queryImagePath = os.path.join(dirPath, "ball.jpg")
+queryImagePath = os.path.join(
+    dirPath, "revolt-164_6wVEHfI-unsplash.jpg")
 resultIndex = os.path.join(dirname, "imagesIndexes")
 
 imagesVectors = indexDataset(dirPath, INDEX_IMAGE_RADIUS)
@@ -152,6 +161,13 @@ descriptor = ImageDescriptor(INDEX_IMAGE_RADIUS)
 queryFeatures = getShapeIndex(queryImagePath, descriptor.describeByShape)
 
 searchInstance = Searcher(loadedIndex)
-result = searchInstance.search(queryFeatures)
+results = searchInstance.search(queryFeatures)
 
-print(result)
+results = results[:5]  # Temporary take only top 5 matches
+showImage(queryImagePath, "queryImage")
+cv2.waitKey(0)
+for result in results:
+    print("match of {}% for image {}".format(
+        result[0], result[1].upper()))
+    showImage(result[1])
+    cv2.waitKey(0)
