@@ -3,15 +3,15 @@ import cv2
 from matplotlib import pyplot as plt
 import os
 
-MIN_MATCH_COUNT = 4
+MIN_MATCH_COUNT = 10
 
 
 dirname = os.path.dirname(__file__)
 dirPath = os.path.join(dirname, "testImages")
 queryImagePath = os.path.join(
-    dirPath, "ashkan-forouzani-zAEZ2MOeJ9M-unsplash.jpg")
+    dirPath, "ball.jpg")
 templateImagePath = os.path.join(
-    dirPath, "arno-senoner-ZT16YkAYueo-unsplash.jpg")
+    dirPath, "nicolas-lobos-MJIIEUlQH60-unsplash.jpg")
 
 
 img1 = cv2.imread(queryImagePath, 0)          # queryImage
@@ -34,13 +34,12 @@ bf = cv2.BFMatcher(cv2.NORM_L1)
 matches = bf.knnMatch(des1,des2, k=2)
 
 # Apply ratio test
-good = []
+goodPointMatches = []
 for m,n in matches:
     if m.distance < 0.75*n.distance:
-        good.append([m])
+        goodPointMatches.append([m]) 
 
-# cv2.drawMatchesKnn expects list of lists as matches.
-img3 = cv2.drawMatchesKnn(img1,kp1,img2,kp2,good,flags=2)
+print(len(goodPointMatches))
+img3 = cv2.drawMatchesKnn(img1,kp1,img2,kp2,goodPointMatches,None,flags=2)
 
 plt.imshow(img3),plt.show()
-print(good)
