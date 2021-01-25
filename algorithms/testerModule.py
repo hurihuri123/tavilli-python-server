@@ -7,6 +7,9 @@ MIN_MATCH_COUNT = 10
 orb = cv2.ORB_create()
 orbMatcher = cv2.BFMatcher(cv2.NORM_HAMMING, crossCheck=True)
 
+sift = cv2.xfeatures2d.SIFT_create()
+siftMathcer = cv2.BFMatcher(cv2.NORM_L1, crossCheck=True)
+
 
 class TesterModule(object):
     def __init__(self, readCallBack, detectCallBack, searchMatchCallback, handleMatchesCB):
@@ -46,7 +49,30 @@ def ORBhandleResult(matches):
         distanceSum += item.distance
 
     distanceAvg = distanceSum / len(matches)
-    return ("sum is {} length is {} avg is {}".format(
+    return ("ORB ->>>>>>>>> sum is {} length is {} avg is {}".format(
+        distanceSum, len(matches), distanceAvg))
+
+# --------------------------
+
+
+def SIFT_detect_callback(image):
+    return sift.detectAndCompute(image, None)
+
+
+def SIFT_match_callback(index1, index2):
+    something, des1 = index1
+    something, des2 = index2
+    return siftMathcer.match(des1, des2)
+
+
+def SIF_handle_result(matches):
+    matches = sorted(matches, key=lambda x: x.distance)
+    distanceSum = 0
+    for item in matches:
+        distanceSum += item.distance
+
+    distanceAvg = distanceSum / len(matches)
+    return ("SIFT------> sum is {} length is {} avg is {}".format(
         distanceSum, len(matches), distanceAvg))
 
 
@@ -61,5 +87,9 @@ templateImagePath = os.path.join(
 testORB = TesterModule(readCallBack=ORB_read_callback,
                        detectCallBack=ORB_detect_callback, searchMatchCallback=ORB_match_callback,
                        handleMatchesCB=ORBhandleResult)
-
 testORB.test(queryImagePath, templateImagePath)
+
+testSIFT = TesterModule(readCallBack=ORB_read_callback,
+                        detectCallBack=SIFT_detect_callback, searchMatchCallback=SIFT_match_callback,
+                        handleMatchesCB=SIF_handle_result)
+testSIFT.test(queryImagePath, templateImagePath)
