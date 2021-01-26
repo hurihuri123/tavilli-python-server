@@ -1,16 +1,13 @@
 # Imports for image describe
-import mahotas
 from imutils.paths import list_images
+
 import numpy as np
-import argparse
-import pickle
-import imutils
 import cv2
+from matplotlib import pyplot as plt
 import os
-import ntpath
+import pickle
 
 # Imports for comparing algorithm
-from scipy.spatial import distance as dist
 
 # Global imports
 import sys
@@ -39,17 +36,20 @@ class ImageDescriptor:
         super().__init__()
         # The radius of the polynomial in pixels
         # The larger the radius the more pixels will be included in the computation
-        self.radius = radius  # Used when computing moments
+        # Initiate SIFT detector
+        self.sift = cv2.xfeatures2d.SIFT_create()
 
     def describeByColor(self, image):
         return None  # Not implemeneted
 
     def describeByShape(self, image):
         # return the Zernike moments for the image
-        return mahotas.features.zernike_moments(image, self.radius)
-
+        kp, des = self.sift.detectAndCompute(image, None)
+        return des
 
 # Create a thresholded image
+
+
 def getImageMask(imagePath):
     image = cv2.imread(imagePath)
     image = cv2.resize(image, (64, 64))
@@ -85,11 +85,11 @@ def getImageOutline(maskedImage):
 
 def getShapeIndex(imagePath, descriptorCallback):
     resultIndex = None
-    image = getImageMask(imagePath)
-    outlilne = getImageOutline(image)
-
+    # image = getImageMask(imagePath)
+    # outlilne = getImageOutline(image)
+    image = cv2.imread(imagePath, 0)
     try:
-        resultIndex = descriptorCallback(outlilne)
+        resultIndex = descriptorCallback(image)
     except Exception as err:
         # Probably too large image for our system (under linux we can set a flag to prevent this issue)
         print("Error indexing image {} , err: {}".format(imagePath, err))
@@ -103,14 +103,12 @@ def indexDataset(dirPath, radius):
 
     # Initialize a descriptor
     descriptor = ImageDescriptor(radius)
-
-    for imagePath in list_images(dirPath):
-        imageName = ntpath.basename(imagePath)
+    # Temporary convert to list and iterate on 5
+    for imagePath in list(list_images(dirPath))[:2]:
+        imageName = os.path.basename(imagePath)
         index = getShapeIndex(
             imagePath, descriptor.describeByShape)
-
         if index is not None:
-            print(index)
             resultIndexes[imageName] = index
 
     return resultIndexes
@@ -121,6 +119,7 @@ class Searcher:
         super().__init__()
         # store the pre-computed features index that we will be searching over
         self.index = index
+        self.bf = cv2.BFMatcher()
 
     def search(self, queryFeatures):
         results = {}
@@ -129,10 +128,23 @@ class Searcher:
         for(k, features) in self.index.items():
             # compute the distance between the query features
             # and features in our index, then update the results
-            d = dist.euclidean(queryFeatures, features)
-            results[k] = d
+            matches = self.bf.knnMatch(queryFeatures, features, k=2)
+            totalDistance = 0
+            # Apply ratio test
+            good = []
+            for m, n in matches:
+                if m.distance < 0.75*n.distance:
+                    good.append(m)
 
-            # sort our results, where a smaller distance indicates higher similarity
+            totalDistance = 0
+            for g in good:
+                totalDistance += g.distance
+
+            results[k] = totalDistance
+            print("searching match for query image with {} , distance: {}".format(
+                k, results[k]))
+
+        # sort our results, where a smaller distance indicates higher similarity
         results = sorted([(v, k) for (k, v) in results.items()])
 
         return results
@@ -163,7 +175,6 @@ queryFeatures = getShapeIndex(queryImagePath, descriptor.describeByShape)
 searchInstance = Searcher(loadedIndex)
 results = searchInstance.search(queryFeatures)
 
-results = results[:5]  # Temporary take only top 5 matches
 showImage(queryImagePath, "queryImage")
 cv2.waitKey(0)
 for result in results:
