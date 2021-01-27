@@ -18,7 +18,7 @@ img1 = cv2.imread(queryImagePath, 0)          # queryImage
 img2 = cv2.imread(templateImagePath, 0)  # trainImage
 
 if img1 is None or img2 is None:
-    print("NONE IMAGE")    
+    print("NONE IMAGE")
 
 # Initiate SIFT detector
 sift = cv2.xfeatures2d.SIFT_create()
@@ -30,16 +30,17 @@ kp2, des2 = sift.detectAndCompute(img2, None)
 
 
 # BFMatcher with default params
-bf = cv2.BFMatcher(cv2.NORM_L1)
-matches = bf.knnMatch(des1,des2, k=2)
+bf = cv2.BFMatcher(cv2.NORM_L1, crossCheck=True)
+matches = bf.knnMatch(des1, des2, k=2)
 
 # Apply ratio test
 goodPointMatches = []
-for m,n in matches:
+for m, n in matches:
     if m.distance < 0.75*n.distance:
-        goodPointMatches.append([m]) 
+        goodPointMatches.append([m])
 
 print(len(goodPointMatches))
-img3 = cv2.drawMatchesKnn(img1,kp1,img2,kp2,goodPointMatches,None,flags=2)
+img3 = cv2.drawMatchesKnn(img1, kp1, img2, kp2,
+                          goodPointMatches, None, flags=2)
 
-plt.imshow(img3),plt.show()
+plt.imshow(img3), plt.show()

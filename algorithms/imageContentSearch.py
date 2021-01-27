@@ -104,7 +104,8 @@ def indexDataset(dirPath, radius):
     # Initialize a descriptor
     descriptor = ImageDescriptor(radius)
     # Temporary convert to list and iterate on 5
-    for imagePath in list(list_images(dirPath))[:2]:
+    # in list(list_images(dirPath))[:2]
+    for imagePath in list_images(dirPath):
         imageName = os.path.basename(imagePath)
         index = getShapeIndex(
             imagePath, descriptor.describeByShape)
@@ -160,7 +161,7 @@ def showImage(imPath, name="result-image"):
 dirname = os.path.dirname(__file__)
 dirPath = os.path.join(dirname, "testImages")
 queryImagePath = os.path.join(
-    dirPath, "revolt-164_6wVEHfI-unsplash.jpg")
+    dirPath, "jeremy-alford-EfLwt5Xz5Ek-unsplash.jpg")
 resultIndex = os.path.join(dirname, "imagesIndexes")
 
 imagesVectors = indexDataset(dirPath, INDEX_IMAGE_RADIUS)

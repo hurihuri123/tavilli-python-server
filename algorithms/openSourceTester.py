@@ -30,9 +30,13 @@ def useBruteForce(img1, img2, kp1, kp2, des1, des2, setDraw, ORB):
 
 def useBruteForceWithRatioTest(img1, img2, kp1, kp2, des1, des2, setDraw, ORB):
     # BFMatcher with default params
-    bf = cv2.BFMatcher(
-        cv2.NORM_HAMMING, crossCheck=True) if ORB else cv2.BFMatcher()
-    matches = bf.knnMatch(des1, des2, k=2)
+    if ORB:
+        bf = cv2.BFMatcher(
+            cv2.NORM_HAMMING, crossCheck=True)
+        matches = bf.match(des1, des2)
+    else:
+        bf = cv2.BFMatcher()
+        matches = bf.knnMatch(des1, des2, k=2)
 
     # Apply ratio test
     good = []
@@ -172,7 +176,7 @@ def useSURF(filename1, filename2, matcherType, setDraw):
     img2 = cv2.imread(filename2, 0)
 
     # Here I set Hessian Threshold to 400
-    surf = cv2.xfeatures2d.SURF_create(400)
+    surf = cv2.xfeatures2d.SURF_create()
 
     # Find keypoints and descriptors directly
     kp1, des1 = surf.detectAndCompute(img1, None)
@@ -205,21 +209,17 @@ def useBRISK(filename1, filename2, matcherType, setDraw):
 
 dirname = os.path.dirname(__file__)
 dirPath = os.path.join(dirname, "testImages")
-shoes1 = os.path.join(
-    dirPath, "shoes-red.jpg")
-shoes2 = os.path.join(
-    dirPath, "shoes-blue.jpg")
-bug1 = os.path.join(
-    dirPath, "bug.jpg")
+ball = os.path.join(
+    dirPath, "ball.jpg")
+bug = os.path.join(
+    dirPath, "creative-headline-APNnyM36puU-unsplash.jpg")
+ball2 = os.path.join(
+    dirPath, "joshua-hoehne-kl6VSadl5mA-unsplash.jpg")
 
 
-print("Comparing shoes with shoes:")
-useSIFT(shoes1, shoes2, 2, False)
-useSURF(shoes1, shoes2, 2, False)
-useBRISK(shoes1, shoes2, 2, False)
-useORB(shoes1, shoes2, 2, False)
-print("Comparing shoes with bug:")
-useSIFT(bug1, shoes2, 2, False)
-useSURF(bug1, shoes2, 2, False)
-useBRISK(bug1, shoes2, 2, False)
-useORB(bug1, shoes2, 2, False)
+print("Comparing ball with ball:")
+useBRISK(ball, bug, 1, False)
+useORB(ball, bug, 1, False)
+print("Comparing ball with bug:")
+useBRISK(ball, ball2, 1, False)
+useORB(ball, ball2, 1, False)
