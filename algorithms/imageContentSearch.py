@@ -134,8 +134,8 @@ class Searcher:
                 if m.distance < 0.75*n.distance:
                     good.append(m)
 
-            maxKeyPoints = max(len(features), len(queryFeatures))
-            matchPercentage = len(good) / maxKeyPoints * 100
+            minKeyPoints = min(len(features), len(queryFeatures))
+            matchPercentage = len(good) / minKeyPoints * 100
             results[k] = matchPercentage
 
         # sort our results, where a smaller distance indicates higher similarity
