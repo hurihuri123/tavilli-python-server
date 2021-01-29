@@ -46,46 +46,9 @@ class ImageDescriptor:
         kp, des = self.sift.detectAndCompute(image, None)
         return des
 
-# Create a thresholded image
-
-
-def getImageMask(imagePath):
-    image = cv2.imread(imagePath)
-    image = cv2.resize(image, (64, 64))
-    # convert it to grayscale
-    image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-    # pad the image with extra white pixels to ensure the
-    # edges of the image are not up against the borders
-    # of the image
-    image = cv2.copyMakeBorder(image, 15, 15, 15, 15,
-                               cv2.BORDER_CONSTANT, value=255)
-
-    return image
-
-
-def getImageOutline(maskedImage):
-    # invert the image and threshold it
-    thresh = cv2.bitwise_not(maskedImage)
-    thresh[thresh > 0] = 255
-
-    # Create a blanck image to store our outline
-    outline = np.zeros(maskedImage.shape, dtype="uint8")
-    # Find the outermost contours
-    cnts = cv2.findContours(thresh.copy(), cv2.RETR_EXTERNAL,
-                            cv2.CHAIN_APPROX_SIMPLE)
-    # handles parsing the contours for various versions of OpenCV.
-    cnts = imutils.grab_contours(cnts)
-    # sort contours descending order and keep the largest
-    cnts = sorted(cnts, key=cv2.contourArea, reverse=True)[0]
-    cv2.drawContours(outline, [cnts], -1, 255, -1)
-
-    return outline
-
 
 def getShapeIndex(imagePath, descriptorCallback):
     resultIndex = None
-    # image = getImageMask(imagePath)
-    # outlilne = getImageOutline(image)
     image = cv2.imread(imagePath, 0)
     try:
         resultIndex = descriptorCallback(image)
@@ -100,10 +63,7 @@ def indexDataset(dirPath, radius):
     # Variable Definition
     resultIndexes = {}
 
-    # Initialize a descriptor
     descriptor = ImageDescriptor(radius)
-    # Temporary convert to list and iterate on 5
-    # in list(list_images(dirPath))[:2]
     for imagePath in list_images(dirPath):
         imageName = os.path.basename(imagePath)
         index = getShapeIndex(
