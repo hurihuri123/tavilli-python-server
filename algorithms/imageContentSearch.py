@@ -134,8 +134,7 @@ class Searcher:
                 if m.distance < 0.75*n.distance:
                     good.append(m)
 
-            minKeyPoints = min(len(features), len(queryFeatures))
-            matchPercentage = len(good) / minKeyPoints * 100
+            matchPercentage = len(good) / len(matches) * 100
             results[k] = matchPercentage
 
         # sort our results, where a smaller distance indicates higher similarity
@@ -154,7 +153,7 @@ def showImage(imPath, name="result-image"):
 dirname = os.path.dirname(__file__)
 dirPath = os.path.join(dirname, "testImages")
 queryImagePath = os.path.join(
-    dirPath, "identical1.jpg")
+    dirPath, "mysapa.jpeg")
 resultIndex = os.path.join(dirname, "imagesIndexes")
 
 imagesVectors = indexDataset(dirPath, INDEX_IMAGE_RADIUS)
