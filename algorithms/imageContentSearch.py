@@ -43,7 +43,6 @@ class ImageDescriptor:
         return None  # Not implemeneted
 
     def describeByShape(self, image):
-        # return the Zernike moments for the image
         kp, des = self.sift.detectAndCompute(image, None)
         return des
 
@@ -142,12 +141,10 @@ class Searcher:
                 totalDistance += g.distance
 
             results[k] = totalDistance
-            print("searching match for query image with {} , distance: {}".format(
-                k, results[k]))
 
         # sort our results, where a smaller distance indicates higher similarity
         results = sorted([(v, k) for (k, v) in results.items()])
-
+        results = reversed(results)  # Sort ascending (top->down)
         return results
 
 
@@ -161,7 +158,7 @@ def showImage(imPath, name="result-image"):
 dirname = os.path.dirname(__file__)
 dirPath = os.path.join(dirname, "testImages")
 queryImagePath = os.path.join(
-    dirPath, "jeremy-alford-EfLwt5Xz5Ek-unsplash.jpg")
+    dirPath, "identical1.jpg")
 resultIndex = os.path.join(dirname, "imagesIndexes")
 
 imagesVectors = indexDataset(dirPath, INDEX_IMAGE_RADIUS)
@@ -176,10 +173,9 @@ queryFeatures = getShapeIndex(queryImagePath, descriptor.describeByShape)
 searchInstance = Searcher(loadedIndex)
 results = searchInstance.search(queryFeatures)
 
+
 showImage(queryImagePath, "queryImage")
 cv2.waitKey(0)
 for result in results:
-    print("match of {}% for image {}".format(
-        result[0], result[1].upper()))
     showImage(result[1])
     cv2.waitKey(0)
