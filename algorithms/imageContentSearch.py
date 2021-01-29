@@ -123,24 +123,20 @@ class Searcher:
 
     def search(self, queryFeatures):
         results = {}
-
         # loop over the images in our index
         for(k, features) in self.index.items():
             # compute the distance between the query features
             # and features in our index, then update the results
             matches = self.bf.knnMatch(queryFeatures, features, k=2)
-            totalDistance = 0
             # Apply ratio test
             good = []
             for m, n in matches:
                 if m.distance < 0.75*n.distance:
                     good.append(m)
 
-            totalDistance = 0
-            for g in good:
-                totalDistance += g.distance
-
-            results[k] = totalDistance
+            maxKeyPoints = max(len(features), len(queryFeatures))
+            matchPercentage = len(good) / maxKeyPoints * 100
+            results[k] = matchPercentage
 
         # sort our results, where a smaller distance indicates higher similarity
         results = sorted([(v, k) for (k, v) in results.items()])
@@ -177,5 +173,6 @@ results = searchInstance.search(queryFeatures)
 showImage(queryImagePath, "queryImage")
 cv2.waitKey(0)
 for result in results:
+    print("Match with {} perecentage {}".format(result[1], result[0]))
     showImage(result[1])
     cv2.waitKey(0)
