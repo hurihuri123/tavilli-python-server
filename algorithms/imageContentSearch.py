@@ -81,21 +81,23 @@ class Searcher:
         self.index = index
         self.bf = cv2.BFMatcher()
 
+    def knnMatch(self, features1, features2):
+        # compute the distance between the query features
+        # and features in our index, then update the results
+        matches = self.bf.knnMatch(features1, features2, k=2)
+        # Apply ratio test
+        good = []
+        for m, n in matches:
+            if m.distance < 0.75*n.distance:
+                good.append(m)
+        matchPercentage = len(good) / len(matches) * 100
+        return matchPercentage
+
     def search(self, queryFeatures):
         results = {}
         # loop over the images in our index
         for(k, features) in self.index.items():
-            # compute the distance between the query features
-            # and features in our index, then update the results
-            matches = self.bf.knnMatch(queryFeatures, features, k=2)
-            # Apply ratio test
-            good = []
-            for m, n in matches:
-                if m.distance < 0.75*n.distance:
-                    good.append(m)
-
-            matchPercentage = len(good) / len(matches) * 100
-            results[k] = matchPercentage
+            results[k] = self.knnMatch(queryFeatures, features)
 
         # sort our results, where a smaller distance indicates higher similarity
         results = sorted([(v, k) for (k, v) in results.items()])
@@ -113,7 +115,7 @@ def showImage(imPath, name="result-image"):
 dirname = os.path.dirname(__file__)
 dirPath = os.path.join(dirname, "testImages")
 queryImagePath = os.path.join(
-    dirPath, "mysapa.jpeg")
+    dirPath, "download (6).jpg")
 resultIndex = os.path.join(dirname, "imagesIndexes")
 
 imagesVectors = indexDataset(dirPath, INDEX_IMAGE_RADIUS)
