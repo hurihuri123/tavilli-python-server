@@ -6,36 +6,30 @@ import numpy as np
 # from skimage.measure import structural_similarity as ssim
 
 
-def mse(imageA, imageB):
-    # the 'Mean Squared Error' between the two images is the
-    # sum of the squared difference between the two images;
-    # NOTE: the two images must have the same dimension
-    height, width = imageA.shape
-    imageB = cv2.resize(imageB, (width, height))
-    diff = cv2.absdiff(imageA, imageB)
-
-    # return the MSE, the lower the error, the more "similar"
-    # the two images are
-    return diff.sum()
-
-
 def showImage(imPath, name="result-image"):
     image = cv2.imread(os.path.join(dirPath, imPath))
     image = cv2.resize(image, (600, 600))
     cv2.imshow(name, image)
 
 
-class Features():
+class BRISK():
     def __init__(self):
         super().__init__()
+        self.brisk = cv2.BRISK_create()
+        self.matcher = cv2.BFMatcher(normType=cv2.NORM_HAMMING,
+                                     crossCheck=True)
 
     def getFeature(self, imagePath):
-        image = cv2.imread(imagePath)
-        image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-        return image
+        image = cv2.imread(imagePath, flags=cv2.IMREAD_GRAYSCALE)
+        keypoints1, descriptors1 = self.brisk.detectAndCompute(image, None)
+        return (keypoints1, descriptors1)
 
     def compareFeatures(self, feature1, feature2):
-        return mse(feature1, feature2)
+        keypoints1, descriptors1 = feature1
+        keypoints2, descriptors2 = feature2
+        matches = self.matcher.match(descriptors1,
+                                     descriptors2)
+        return 100
 
 
 class Search():
@@ -72,7 +66,6 @@ if __name__ == "__main__":
     dirPath = os.path.join(dirname, "testImages")
     queryImagePath = os.path.join(dirPath, "identical1.jpg")
 
-    features = Features()
-    searcher = Search(features.getFeature, features.compareFeatures)
-    results = searcher.match(queryImagePath)
-    searcher.showResults(queryImagePath, results)
+    brisk = BRISK()
+    searchBRISK = Search(brisk.getFeature, brisk.compareFeatures)
+    searchBRISK.showResults(queryImagePath, searchBRISK.match(queryImagePath))
