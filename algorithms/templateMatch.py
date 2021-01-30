@@ -19,6 +19,12 @@ def mse(imageA, imageB):
     return diff.sum()
 
 
+def showImage(imPath, name="result-image"):
+    image = cv2.imread(os.path.join(dirPath, imPath))
+    image = cv2.resize(image, (600, 600))
+    cv2.imshow(name, image)
+
+
 class Features():
     def __init__(self):
         super().__init__()
@@ -52,8 +58,8 @@ class Search():
         results = sorted([(v, k) for (k, v) in results.items()])
         return results
 
-    def showResults(queryPath, results):
-        showImage(queryImagePath, "queryImage")
+    def showResults(self, queryPath, results):
+        showImage(queryPath, "queryImage")
         cv2.waitKey(0)
         for result in results:
             print("Match with {} perecentage {}".format(result[1], result[0]))
