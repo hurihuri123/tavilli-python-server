@@ -10,12 +10,23 @@ def drawCon(contours, image, name="name"):
     cv2.imshow(name, image)
 
 
+def match(contours, contours2):
+    distanceHausdor = cv2.createHausdorffDistanceExtractor(
+    ).computeDistance(contours[0], contours2[0])
+
+    distance = cv2.matchShapes(
+        contours[0], contours2[0], cv2.CONTOURS_MATCH_I1, 0)
+
+    print("matchShape: {} , Hausdor: {} , ShapeContext: ".format(
+        distance, distanceHausdor))
+
+
 dirname = os.path.dirname(__file__)
 dirPath = os.path.join(dirname, "testImages")
 queryImagePath = os.path.join(
     dirPath, "identical1.jpg")
 queryImagePath2 = os.path.join(
-    dirPath, "identical2.jpg")
+    dirPath, "identical3.jpg")
 
 im1 = cv2.imread(queryImagePath)
 im2 = cv2.imread(queryImagePath2)
@@ -45,6 +56,4 @@ drawCon(contours, im1, name="image1")
 drawCon(contours2, im2, name="image2")
 cv2.waitKey()
 
-distance = cv2.matchShapes(
-    contours[0], contours2[0], cv2.CONTOURS_MATCH_I1, 0)
-print(distance)
+match(contours, contours2)
