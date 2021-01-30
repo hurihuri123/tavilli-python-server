@@ -8,20 +8,24 @@ def getFeature(imagePath):
     return {}
 
 
-dirname = os.path.dirname(__file__)
-dirPath = os.path.join(dirname, "testImages")
-queryImagePath = os.path.join(dirPath, "ball.jpg")
-resultIndex = os.path.join(dirname, "imagesIndexes")
-
-resultIndexes = {}
-for imagePath in list_images(dirPath):
-    imageName = ntpath.basename(imagePath)
-    resultIndexes[imageName] = getFeature(imagePath)
+def compareFeatures(feature1, feature2):
+    return 100
 
 
-results = {}
-for(k, features) in resultIndex.items():
-    results[k] = -1
+if __name__ == "__main__":
+    dirname = os.path.dirname(__file__)
+    dirPath = os.path.join(dirname, "testImages")
+    queryImagePath = os.path.join(dirPath, "ball.jpg")
 
-results = sorted([(v, k) for (k, v) in results.items()])
-print(results)
+    resultIndexes = {}
+    for imagePath in list_images(dirPath):
+        imageName = ntpath.basename(imagePath)
+        resultIndexes[imageName] = getFeature(imagePath)
+
+    queryFeatures = getFeature(queryImagePath)
+    results = {}
+    for(k, features) in resultIndexes.items():
+        results[k] = compareFeatures(features, queryFeatures)
+
+    results = sorted([(v, k) for (k, v) in results.items()])
+    print(results)
