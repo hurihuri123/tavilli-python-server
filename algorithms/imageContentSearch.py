@@ -14,6 +14,7 @@ import sys
 # from utilities.helper import Helper
 
 INDEX_IMAGE_RADIUS = 21
+isOrb = False
 
 
 # TODO - use this function from 'utilities' (will work when starting module from main)
@@ -37,13 +38,13 @@ class ImageDescriptor:
         # The radius of the polynomial in pixels
         # The larger the radius the more pixels will be included in the computation
         # Initiate SIFT detector
-        self.sift = cv2.xfeatures2d.SIFT_create()
+        self.descriptor = cv2.ORB_create() if isOrb else cv2.xfeatures2d.SIFT_create()
 
     def describeByColor(self, image):
         return None  # Not implemeneted
 
     def describeByShape(self, image):
-        kp, des = self.sift.detectAndCompute(image, None)
+        kp, des = self.descriptor.detectAndCompute(image, None)
         return des
 
 
@@ -79,7 +80,8 @@ class Searcher:
         super().__init__()
         # store the pre-computed features index that we will be searching over
         self.index = index
-        self.bf = cv2.BFMatcher()
+        self.bf = cv2.BFMatcher(
+            cv2.NORM_HAMMING, crossCheck=True) if isOrb else cv2.BFMatcher()
 
     def knnMatch(self, features1, features2):
         # compute the distance between the query features
@@ -93,15 +95,27 @@ class Searcher:
         matchPercentage = len(good) / len(matches) * 100
         return matchPercentage
 
+    def bfMatch(self, features1, features2):
+        # compute the distance between the query features
+        # and features in our index, then update the results
+        matches = self.bf.match(features1, features2)
+        # Apply ratio test
+        distance = 0
+        for g in matches:
+            distance += g.distance
+        return distance
+
     def search(self, queryFeatures):
         results = {}
         # loop over the images in our index
         for(k, features) in self.index.items():
-            results[k] = self.knnMatch(queryFeatures, features)
+            results[k] = self.bfMatch(queryFeatures, features) if isOrb else self.knnMatch(
+                queryFeatures, features)
 
         # sort our results, where a smaller distance indicates higher similarity
         results = sorted([(v, k) for (k, v) in results.items()])
-        results = reversed(results)  # Sort ascending (top->down)
+        if not isOrb:
+            results = reversed(results)  # Sort ascending (top->down)
         return results
 
 
@@ -115,7 +129,7 @@ def showImage(imPath, name="result-image"):
 dirname = os.path.dirname(__file__)
 dirPath = os.path.join(dirname, "testImages")
 queryImagePath = os.path.join(
-    dirPath, "download (6).jpg")
+    dirPath, "images (63).jpg")
 resultIndex = os.path.join(dirname, "imagesIndexes")
 
 imagesVectors = indexDataset(dirPath, INDEX_IMAGE_RADIUS)
