@@ -8,6 +8,14 @@ from imutils.paths import list_images
 import ntpath
 from pathlib import Path
 
+import cv2  # Temporary import (just for show)
+
+
+def showImage(image_path, name="result-image"):
+    image = cv2.imread(image_path)
+    image = cv2.resize(image, (600, 600))
+    cv2.imshow(name, image)
+
 
 class FeatureExtractor:
     def __init__(self):
@@ -37,6 +45,7 @@ class FeatureExtractor:
 # Build features dataset
 # Iterate through images (Change the path based on your image location)
 
+
     def extractDirectory(self, sourcePath, destPath):
         for img_path in list_images(dataset_dir):
             # Extract Features
@@ -55,7 +64,7 @@ dirname = os.path.dirname(__file__)
 dataset_dir = os.path.join(dirname, "testImages")
 features_dir = os.path.join(dirname, "features")
 
-queryPath = os.path.join(dataset_dir, "identical1.jpg")
+queryPath = os.path.join(dataset_dir, "images (61).jpg")
 
 fe = FeatureExtractor()
 # fe.extractDirectory(dataset_dir, features_dir)
@@ -79,4 +88,9 @@ query_features = fe.extract(img=Image.open(queryPath))
 dists = np.linalg.norm(features-query_features, axis=1)
 ids = np.argsort(dists)[:30]  # Top 30 results
 scores = [(dists[id], img_paths[id]) for id in ids]
+
 print(scores)
+for score in scores:
+    print("Match with {} perecentage {}".format(score[1], score[0]))
+    showImage(score[1])
+    cv2.waitKey(0)
