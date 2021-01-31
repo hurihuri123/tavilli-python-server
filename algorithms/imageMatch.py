@@ -43,12 +43,15 @@ class FeatureExtractor:
         feature = self.model.predict(x)[0]  # (1, 4096) -> (4096, )
         return feature / np.linalg.norm(feature)  # Normalize
 
-
-# Build features dataset
-# Iterate through images (Change the path based on your image location)
-
-
     def extractDirectory(self, sourcePath, destPath):
+        """
+        Iterate threw directory and extract feature for each image
+        Args:
+            sourcePath: directory path
+            destPath: result featured files directory
+        Returns:
+            NONE
+        """
         for img_path in list_images(dataset_dir):
             # Extract Features
             feature = self.extract(img=Image.open(img_path))
