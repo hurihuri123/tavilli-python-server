@@ -101,18 +101,15 @@ class ImageMatch(FeatureExtractor):
         return scores
 
 
-image_matcher = ImageMatch()
-if not os.path.isfile(DATASET_FILE_NAME):
-    image_matcher.init_dataset(images_dir, DATASET_FILE_NAME)
-scores = image_matcher.search(
-    DATASET_FILE_NAME, os.path.join(images_dir, "images (61).jpg"))
+if __name__ == "__main__":
+    image_matcher = ImageMatch()
+    if not os.path.isfile(DATASET_FILE_NAME):
+        image_matcher.init_dataset(images_dir, DATASET_FILE_NAME)
+    scores = image_matcher.search(
+        DATASET_FILE_NAME, os.path.join(images_dir, "images (61).jpg"))
 
-#
-# np.save(dataset_path, features)
-
-
-print(scores)
-for score in scores:
-    print("Match with {} perecentage {}".format(score[1], score[0]))
-    showImage(score[1])
-    cv2.waitKey(0)
+    print(scores)
+    for score in scores:
+        print("Match with {} perecentage {}".format(score[1], score[0]))
+        showImage(score[1])
+        cv2.waitKey(0)

@@ -1,5 +1,5 @@
 from algorithms.textMatch import calculateTextMatch
-from algorithms.templateMatch import templateMatch
+from algorithms.imageMatch import ImageMatch
 from utilities.queries import *
 
 
