@@ -19,7 +19,9 @@ def showImage(image_path, name="result-image"):
 
 class FeatureExtractor:
     def __init__(self):
+        # Use VGG-16 as the architecture and ImageNet (pre-tranined model) for the weight
         base_model = VGG16(weights='imagenet')
+        # Customize the model to return features from fully-connected layer
         self.model = Model(inputs=base_model.input,
                            outputs=base_model.get_layer('fc1').output)
 
