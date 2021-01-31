@@ -6,6 +6,7 @@ import os
 from PIL import Image
 from imutils.paths import list_images
 import ntpath
+from pathlib import Path
 
 
 class FeatureExtractor:
@@ -33,20 +34,49 @@ class FeatureExtractor:
         return feature / np.linalg.norm(feature)  # Normalize
 
 
+# Build features dataset
+# Iterate through images (Change the path based on your image location)
+
+    def extractDirectory(self, sourcePath, destPath):
+        for img_path in list_images(dataset_dir):
+            # Extract Features
+            feature = self.extract(img=Image.open(img_path))
+            # Extract image name
+            image_name = os.path.basename(img_path)  # Extract name from path
+            # image_name = os.path.splitext(image_name)[0]  # Extract extention from name
+            # Save the Numpy array (.npy) on designated path
+            feature_path = os.path.join(
+                features_dir, "{}.npy".format(image_name))
+            np.save(feature_path, feature)
+            print("formated {}".format(feature_path))
+
+
 dirname = os.path.dirname(__file__)
-dataset_dir = os.path.join(dirname, "dataset")
+dataset_dir = os.path.join(dirname, "testImages")
 features_dir = os.path.join(dirname, "features")
 
+queryPath = os.path.join(dataset_dir, "identical1.jpg")
 
 fe = FeatureExtractor()
-# Iterate through images (Change the path based on your image location)
-for img_path in list_images(dataset_dir):
-    # Extract Features
-    feature = fe.extract(img=Image.open(img_path))
-    # Extract image name
-    image_name = os.path.basename(img_path)  # Extract name from path
-    image_name = os.path.splitext(image_name)[0]  # Extract extention from name
-    # Save the Numpy array (.npy) on designated path
-    feature_path = os.path.join(features_dir, "{}.npy".format(image_name))
-    np.save(feature_path, feature)
-    print("formated {}".format(feature_path))
+# fe.extractDirectory(dataset_dir, features_dir)
+
+
+# Read features from dataset to memory
+features = []
+img_paths = []
+for feature_path in Path(features_dir).glob("*.npy"):
+    features.append(np.load(feature_path))
+    img_paths.append(os.path.join(dataset_dir, feature_path.stem))
+features = np.array(features)
+
+# TODO: download query image
+
+# Calculate query features
+query_features = fe.extract(img=Image.open(queryPath))
+
+# Perform search
+# L2 distances to features
+dists = np.linalg.norm(features-query_features, axis=1)
+ids = np.argsort(dists)[:30]  # Top 30 results
+scores = [(dists[id], img_paths[id]) for id in ids]
+print(scores)
