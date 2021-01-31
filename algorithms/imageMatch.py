@@ -12,6 +12,13 @@ import hickle as hkl
 import cv2  # Temporary import (just for show)
 
 
+DATASET_FILE_NAME = "dataset.hkl"
+
+dirname = os.path.dirname(__file__)
+images_dir = os.path.join(dirname, "testImages")
+TEMPORARY_IMAGE_DIR = images_dir
+
+
 def showImage(image_path, name="result-image"):
     image = cv2.imread(os.path.join(images_dir, image_path))
     image = cv2.resize(image, (600, 600))
@@ -66,36 +73,43 @@ class FeatureExtractor:
         return features
 
 
-dirname = os.path.dirname(__file__)
-images_dir = os.path.join(dirname, "testImages")
-dataset_path = "dataset.hkl"
+class ImageMatch(FeatureExtractor):
+    def __init__(self):
+        super().__init__()
 
-queryPath = os.path.join(images_dir, "images (61).jpg")
+    def init_dataset(self, images_directory, result_file):
+        features = self.extractDirectory(images_directory)
+        hkl.dump(features, result_file)
 
-fe = FeatureExtractor()
-# features = fe.extractDirectory(images_dir)
-# hkl.dump(features, dataset_path)
+    def search(self, dataset_path, query_path):
+        dataset = hkl.load(dataset_path)
+        features = []
+        img_paths = []
+
+        for key, value in dataset.items():
+            features.append(value)
+            img_paths.append(key)
+        features = np.array(features)
+
+        # Calculate query features
+        query_features = self.extract(query_path)
+
+        # L2 distances to features
+        dists = np.linalg.norm(features-query_features, axis=1)
+        ids = np.argsort(dists)[:30]  # Top 30 results
+        scores = [(dists[id], img_paths[id]) for id in ids]
+        return scores
+
+
+image_matcher = ImageMatch()
+if not os.path.isfile(DATASET_FILE_NAME):
+    image_matcher.init_dataset(images_dir, DATASET_FILE_NAME)
+scores = image_matcher.search(
+    DATASET_FILE_NAME, os.path.join(images_dir, "images (61).jpg"))
+
+#
 # np.save(dataset_path, features)
 
-dataset = hkl.load(dataset_path)
-
-features = []
-img_paths = []
-for key, value in dataset.items():
-    features.append(value)
-    img_paths.append(key)
-features = np.array(features)
-
-# TODO: download query image
-
-# Calculate query features
-query_features = fe.extract(queryPath)
-
-# Perform search
-# L2 distances to features
-dists = np.linalg.norm(features-query_features, axis=1)
-ids = np.argsort(dists)[:30]  # Top 30 results
-scores = [(dists[id], img_paths[id]) for id in ids]
 
 print(scores)
 for score in scores:
