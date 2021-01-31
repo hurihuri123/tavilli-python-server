@@ -7,12 +7,13 @@ from PIL import Image
 from imutils.paths import list_images
 import ntpath
 from pathlib import Path
+import hickle as hkl
 
 import cv2  # Temporary import (just for show)
 
 
 def showImage(image_path, name="result-image"):
-    image = cv2.imread(image_path)
+    image = cv2.imread(os.path.join(images_dir, image_path))
     image = cv2.resize(image, (600, 600))
     cv2.imshow(name, image)
 
@@ -25,14 +26,16 @@ class FeatureExtractor:
         self.model = Model(inputs=base_model.input,
                            outputs=base_model.get_layer('fc1').output)
 
-    def extract(self, img):
+    def extract(self, img_path):
         """
         Extract a deep feature from an input image
         Args:
-            img: from PIL.Image.open(path) or tensorflow.keras.preprocessing.image.load_img(path)
+            img: 
         Returns:
             feature (np.ndarray): deep feature with the shape=(4096, )
         """
+        # open image with PIL.Image.open(path) or tensorflow.keras.preprocessing.image.load_img(path)
+        img = Image.open(img_path)
         img = img.resize((224, 224))  # VGG must take a 224x224 img as an input
         img = img.convert('RGB')  # Make sure img is color
         # To np.array. Height x Width x Channel. dtype=float32
@@ -43,50 +46,50 @@ class FeatureExtractor:
         feature = self.model.predict(x)[0]  # (1, 4096) -> (4096, )
         return feature / np.linalg.norm(feature)  # Normalize
 
-    def extractDirectory(self, sourcePath, destPath):
+    def extractDirectory(self, source_dir):
         """
         Iterate threw directory and extract feature for each image
         Args:
-            sourcePath: directory path
-            destPath: result featured files directory
+            sourcePath: directory path            
         Returns:
-            NONE
+            features dictonary
         """
-        for img_path in list_images(dataset_dir):
+        features = {}
+        for img_path in list_images(source_dir):
             # Extract Features
-            feature = self.extract(img=Image.open(img_path))
+            feature = self.extract(img_path)
             # Extract image name
             image_name = os.path.basename(img_path)  # Extract name from path
             # image_name = os.path.splitext(image_name)[0]  # Extract extention from name
             # Save the Numpy array (.npy) on designated path
-            feature_path = os.path.join(
-                features_dir, "{}.npy".format(image_name))
-            np.save(feature_path, feature)
-            print("formated {}".format(feature_path))
+            features[image_name] = feature
+        return features
 
 
 dirname = os.path.dirname(__file__)
-dataset_dir = os.path.join(dirname, "testImages")
-features_dir = os.path.join(dirname, "features")
+images_dir = os.path.join(dirname, "testImages")
+dataset_path = "dataset.hkl"
 
-queryPath = os.path.join(dataset_dir, "images (61).jpg")
+queryPath = os.path.join(images_dir, "images (61).jpg")
 
 fe = FeatureExtractor()
-fe.extractDirectory(dataset_dir, features_dir)
+# features = fe.extractDirectory(images_dir)
+# hkl.dump(features, dataset_path)
+# np.save(dataset_path, features)
 
+dataset = hkl.load(dataset_path)
 
-# Read features from dataset to memory
 features = []
 img_paths = []
-for feature_path in Path(features_dir).glob("*.npy"):
-    features.append(np.load(feature_path))
-    img_paths.append(os.path.join(dataset_dir, feature_path.stem))
+for key, value in dataset.items():
+    features.append(value)
+    img_paths.append(key)
 features = np.array(features)
 
 # TODO: download query image
 
 # Calculate query features
-query_features = fe.extract(img=Image.open(queryPath))
+query_features = fe.extract(queryPath)
 
 # Perform search
 # L2 distances to features
