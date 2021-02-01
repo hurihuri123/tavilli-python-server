@@ -1,7 +1,10 @@
 from utilities.mySql import MySqlConnector
+from utilities.multiKeysDict import MultiKeysDict
 from utilities.queries import Queries, OFFERS_TABLE, REQUESTS_TABLE, MATCH_FIELDS, CATEGORY_FIELD, SUBCATEGORY_FIELD, Offer
+
 from algorithms.match import Match
 from algorithms.imageMatch import ImageMatch
+
 from config.config import *
 from imutils.paths import list_images
 import os
@@ -54,19 +57,22 @@ class someClass():
         # Get all offers
         offers = self.database.executeQuery(
             Queries.getOffers(required_images=True))
+
         # Read all existing offers datasets features
-        categories_dataset_list = {}
+        categories_dataset = MultiKeysDict()
         for dataset_file in list_images(self.offers_directory):
             (features, imgs_path) = self.image_matcher.load_dataset(dataset_file)
             category, subcategory = self.get_category_from_filename(
                 dataset_file)
-            categories_dataset_list[category][subcategory] = (
-                features, imgs_path)
+
+            categories_dataset.newItem(
+                (features, imgs_path), category, subcategory)
+
         # Iterate on offers and append missing features
-        categories_dataset_list[1][1] = ([], [])
         for item in offers:
             offer = Offer(item)
-            category_dataset = categories_dataset_list[offer.category][offer.subcategory]
+            category_dataset = categories_dataset.readItem(
+                offer.category, offer.subcategory)
             if category_dataset is None:
                 # TODO: create new dataset file
                 pass
