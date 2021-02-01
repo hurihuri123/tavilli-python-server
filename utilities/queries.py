@@ -17,14 +17,45 @@ MATCH_FIELDS = "{},ownerId,{},{},{},{},{},{}".format(
     DESCRIPTION_FIELD, IMAGES_FIELD, TITLE_FIELD, PRICE_FIELD, ID_FIELD, CATEGORY_FIELD, SUBCATEGORY_FIELD)
 
 
+class Offer(object):
+    def __init__(self, offer):
+        super().__init__()
+        self.offer = offer
+
+    @property
+    def images(self):
+        result = []
+        if(self.offer[IMAGES_FIELD] != ""):
+            result = self.offer[IMAGES_FIELD].split(",")
+        return result
+
+    @property
+    def category(self):
+        return self.offer[CATEGORY_FIELD]
+
+    @property
+    def subcategory(self):
+        return self.offer[SUBCATEGORY_FIELD]
+
+
 class Queries():
     # TODO: filter by category
     @staticmethod
-    def getOffers(category_id, subcategory_id, auto_submit=True):
-        where_query = "WHERE {autoSubmit} = {autoSubmitValue} AND {category} = {categoryValue} AND {subcategory} = {subcategoryValue}".format(
-            autoSubmit=AUTO_SUBMIT_FIELD, autoSubmitValue=auto_submit, category=CATEGORY_FIELD,
-            categoryValue=category_id, subcategory=SUBCATEGORY_FIELD, subcategoryValue=subcategory_id)
-        return "SELECT {matchFields} FROM {table} {whereQuery}".format(matchFields=MATCH_FIELDS, table=OFFERS_TABLE, whereQuery=where_query)
+    def getOffers(category_id=None, subcategory_id=None, required_images=False, auto_submit=True):
+        query_extra_filters = ""
+
+        # Set optional query filter fields
+        if category_id is not None and subcategory_id is not None:
+            query_extra_filters += "AND {category} = {categoryValue} AND {subcategory} = {subcategoryValue}".format(
+                category=CATEGORY_FIELD,
+                categoryValue=category_id, subcategory=SUBCATEGORY_FIELD, subcategoryValue=subcategory_id)
+        if required_images:
+            query_extra_filters += "AND {images} != ''".format(
+                images=IMAGES_FIELD)
+
+        return "SELECT {matchFields} FROM {table} WHERE {autoSubmit} = {autoSubmitValue} {extraFilters}".format(
+            matchFields=MATCH_FIELDS, table=OFFERS_TABLE, autoSubmit=AUTO_SUBMIT_FIELD,
+            autoSubmitValue=auto_submit, extraFilters=query_extra_filters)
 
     @staticmethod
     def getRequests():

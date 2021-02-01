@@ -1,11 +1,12 @@
 from utilities.mySql import MySqlConnector
-from utilities.queries import Queries, OFFERS_TABLE, REQUESTS_TABLE, MATCH_FIELDS, CATEGORY_FIELD, SUBCATEGORY_FIELD
+from utilities.queries import Queries, OFFERS_TABLE, REQUESTS_TABLE, MATCH_FIELDS, CATEGORY_FIELD, SUBCATEGORY_FIELD, Offer
 from algorithms.match import Match
 from algorithms.imageMatch import ImageMatch
 from config.config import *
+from imutils.paths import list_images
 import os
 
-#TODO: doc
+# TODO: doc
 
 
 class someClass():
@@ -14,6 +15,12 @@ class someClass():
         self.database = MySqlConnector(
             DATABASE_HOST, DATABASE_USERNAME, DATEBASE_PASSWORD, DATABASE_NAME)
         self.image_matcher = ImageMatch()
+
+        current_directory = os.path.dirname(__file__)
+        dataset_directory = os.path.join(current_directory, "dataset")
+        self.offers_directory = os.path.join(dataset_directory, "offers")
+        self.requests_directory = os.path.join(dataset_directory, "requests")
+
         self.init_datasets()
 
     def search_match_for_request(self, request):
@@ -38,19 +45,54 @@ class someClass():
         pass
 
     def init_datasets(self):
-        # TODO: select all offers and check that i have a dataset file for each existing cateogry, otherwise, create one
-        dataset_filename = self.get_dataset_filename(2, 2)
-        if not os.path.isfile(dataset_filename):  # Check if dataset file exists
-            self.init_category_dataset(2, 2)
+        self.init_dataset_offers()
+        # dataset_filename = self.get_filename_from_category(2, 2)
+        # if not os.path.isfile(dataset_filename):  # Check if dataset file exists
+        #     self.init_category_dataset(2, 2)
+
+    def init_dataset_offers(self):
+        # Get all offers
+        offers = self.database.executeQuery(
+            Queries.getOffers(required_images=True))
+        # Read all existing offers datasets features
+        categories_dataset_list = {}
+        for dataset_file in list_images(self.offers_directory):
+            (features, imgs_path) = self.image_matcher.load_dataset(dataset_file)
+            category, subcategory = self.get_category_from_filename(
+                dataset_file)
+            categories_dataset_list[category][subcategory] = (
+                features, imgs_path)
+        # Iterate on offers and append missing features
+        categories_dataset_list[1][1] = ([], [])
+        for item in offers:
+            offer = Offer(item)
+            category_dataset = categories_dataset_list[offer.category][offer.subcategory]
+            if category_dataset is None:
+                # TODO: create new dataset file
+                pass
+            for image in offer.images:
+                found = self.image_matcher.find_feature_by_image_path(image)
+                if found is None:
+                    # TODO: download new image and append to dataset / create dataset
+                    pass
 
     def init_category_dataset(self, category_id, subcategory_id):
-        # TODO: read all images
+        # TODO: select all images
         imagesDir = None
         image_matcher.init_dataset(
-            imagesDir, self.get_dataset_filename(category_id, subcategory_id))
+            imagesDir, self.get_filename_from_category(category_id, subcategory_id))
 
-    def get_dataset_filename(self, category_id, subcategory_id):
+    @staticmethod
+    def get_filename_from_category(category_id, subcategory_id):
         return "{}/{}.hkl".format(category_id, subcategory_id)
+
+    @staticmethod
+    def get_category_from_filename(filename):
+        splited = filename.split("/")
+        category = splited[0]
+        splited = filename.split(".")
+        subcategory = splited[0]
+        return (category, subcategory)
 
 
 if __name__ == "__main__":

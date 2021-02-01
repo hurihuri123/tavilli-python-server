@@ -68,7 +68,7 @@ class ImageMatch(FeatureExtractor):
         features = self.extractDirectory(images_directory)
         hkl.dump(features, result_file)
 
-    def search(self, dataset_path, query_path):
+    def load_dataset(self, dataset_path):
         dataset = hkl.load(dataset_path)
         features = []
         img_paths = []
@@ -77,7 +77,21 @@ class ImageMatch(FeatureExtractor):
             features.append(value)
             img_paths.append(key)
         features = np.array(features)
+        return (features, img_paths)
 
+    def find_feature_by_image_path(self, dataset_tuple, image_path, start_index=0):
+        (features, img_paths) = dataset_tuple
+        feature = None
+        try:
+            index = img_paths.index(image_path, start_index)
+            feature = features[index]
+        except ValueError:
+            pass
+        finally:
+            return feature
+
+    def search(self, dataset_path, query_path):
+        features, img_paths = self.load_dataset(dataset_path)
         # Calculate query features
         query_features = self.extract(query_path)
 
