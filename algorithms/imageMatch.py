@@ -12,19 +12,6 @@ import hickle as hkl
 import cv2  # Temporary import (just for show)
 
 
-DATASET_FILE_NAME = "dataset.hkl"
-
-dirname = os.path.dirname(__file__)
-images_dir = os.path.join(dirname, "testImages")
-TEMPORARY_IMAGE_DIR = images_dir
-
-
-def showImage(image_path, name="result-image"):
-    image = cv2.imread(os.path.join(images_dir, image_path))
-    image = cv2.resize(image, (600, 600))
-    cv2.imshow(name, image)
-
-
 class FeatureExtractor:
     def __init__(self):
         # Use VGG-16 as the architecture and ImageNet (pre-tranined model) for the weight
@@ -99,6 +86,19 @@ class ImageMatch(FeatureExtractor):
         ids = np.argsort(dists)[:30]  # Top 30 results
         scores = [(dists[id], img_paths[id]) for id in ids]
         return scores
+
+
+DATASET_FILE_NAME = "dataset.hkl"
+
+dirname = os.path.dirname(__file__)
+images_dir = os.path.join(dirname, "testImages")
+TEMPORARY_IMAGE_DIR = images_dir
+
+
+def showImage(image_path, name="result-image"):
+    image = cv2.imread(os.path.join(images_dir, image_path))
+    image = cv2.resize(image, (600, 600))
+    cv2.imshow(name, image)
 
 
 if __name__ == "__main__":
