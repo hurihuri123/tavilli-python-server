@@ -1,12 +1,16 @@
 from utilities.mySql import MySqlConnector
 from utilities.multiKeysDict import MultiKeysDict
 from utilities.queries import Queries, OFFERS_TABLE, REQUESTS_TABLE, MATCH_FIELDS, CATEGORY_FIELD, SUBCATEGORY_FIELD, Offer
+from utilities.utilities import get_image_from_url
+
 
 from algorithms.match import Match
 from algorithms.imageMatch import ImageMatch
 
 from config.config import *
 from imutils.paths import list_images
+
+from PIL import Image
 import os
 
 # TODO: doc
@@ -85,9 +89,15 @@ class someClass():
                 found = self.image_matcher.find_feature_by_image_path(
                     category_dataset, image)
                 if found is None:
-                    # TODO: download new image and append to dataset features
+                    # Download image and extract it's features
+                    image_features = self.image_matcher.extract(
+                        img=Image.open(get_image_from_url(image)))
+                    # Append features to dataset
+                    category_dataset[0].append(image_features)
+                    category_dataset[1].append(image)  # Append Image path
+                    # Mark dataset as modified
                     modified_categories_ids.newItem(
-                        True, offer.category, offer.subcategory)  # Mark dataset as modified
+                        True, offer.category, offer.subcategory)
             # Save updated datasets to file
             for category, subcategory in modified_categories_ids.items():
                 category_dataset = categories_dataset.readItem(

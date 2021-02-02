@@ -1,9 +1,11 @@
 
 
-from config.config import DATABASE_NAME
+from config.config import DATABASE_NAME, OFFERS_IMAGES_FOLDER
+# Tables
 OFFERS_TABLE = "offers"
 REQUESTS_TABLE = "requests"
 
+# Fields
 DESCRIPTION_FIELD = "description"
 IMAGES_FIELD = "images"
 TITLE_FIELD = "title"
@@ -13,29 +15,9 @@ CATEGORY_FIELD = "category"
 SUBCATEGORY_FIELD = "subCategory"
 AUTO_SUBMIT_FIELD = "autoSubmit"
 
+
 MATCH_FIELDS = "{},ownerId,{},{},{},{},{},{}".format(
     DESCRIPTION_FIELD, IMAGES_FIELD, TITLE_FIELD, PRICE_FIELD, ID_FIELD, CATEGORY_FIELD, SUBCATEGORY_FIELD)
-
-
-class Offer(object):
-    def __init__(self, offer):
-        super().__init__()
-        self.offer = offer
-
-    @property
-    def images(self):
-        result = []
-        if(self.offer[IMAGES_FIELD] != ""):
-            result = self.offer[IMAGES_FIELD].split(",")
-        return result
-
-    @property
-    def category(self):
-        return self.offer[CATEGORY_FIELD]
-
-    @property
-    def subcategory(self):
-        return self.offer[SUBCATEGORY_FIELD]
 
 
 class Queries():
@@ -60,3 +42,27 @@ class Queries():
     @staticmethod
     def getRequests():
         return "SELECT {} FROM {}".format(MATCH_FIELDS, REQUESTS_TABLE)
+
+
+class Offer(object):
+    def __init__(self, offer):
+        super().__init__()
+        self.offer = offer
+
+    @property
+    def images(self):
+        result = []
+        if(self.offer[IMAGES_FIELD] != ""):
+            images = self.offer[IMAGES_FIELD].split(",")
+            # Append full path to each image name
+            return map(lambda image_name: OFFERS_IMAGES_FOLDER + image_name, images)
+
+        return result
+
+    @property
+    def category(self):
+        return self.offer[CATEGORY_FIELD]
+
+    @property
+    def subcategory(self):
+        return self.offer[SUBCATEGORY_FIELD]
