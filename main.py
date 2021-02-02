@@ -75,13 +75,14 @@ class someClass():
                     modified_categories_ids.newItem(
                         True, offer.category, offer.subcategory)
             # Save updated datasets to file
-            for category, subcategory in modified_categories_ids.items():
-                category_dataset = categories_dataset.readItem(
-                    offer.category, offer.subcategory)
-                (category_features, img_paths) = category_dataset
+            for category, subcategories in modified_categories_ids.items():
+                for subcategory in subcategories:
+                    category_dataset = categories_dataset.readItem(
+                        offer.category, offer.subcategory)
+                    (category_features, img_paths) = category_dataset
 
-                self.image_matcher.save_dataset(
-                    category_features, self.get_filename_from_category(category, subcategory))
+                    self.image_matcher.save_dataset(
+                        category_features, self.get_filename_from_category(category, subcategory))
 
     def search_match_for_request(self, request):
         matches = []
