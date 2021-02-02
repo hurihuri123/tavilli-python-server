@@ -55,7 +55,7 @@ class Offer(object):
         if(self.offer[IMAGES_FIELD] != ""):
             images = self.offer[IMAGES_FIELD].split(",")
             # Append full path to each image name
-            return map(lambda image_name: OFFERS_IMAGES_FOLDER + image_name, images)
+            return map(lambda image_name: OFFERS_IMAGES_FOLDER + "/" + image_name, images)
 
         return result
 
