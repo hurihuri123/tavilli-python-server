@@ -30,27 +30,6 @@ class someClass():
 
         self.init_datasets()
 
-    def search_match_for_request(self, request):
-        matches = []
-        # TODO: select filter by request price as well
-        # Select offers according to request info
-        offers = self.database.executeQuery(Queries.getOffers(
-            request[CATEGORY_FIELD], request[SUBCATEGORY_FIELD]))
-        # Init images dataset according to request category
-
-        # Get request's image features
-        # Compare dataset with query features
-        for offer in offers:
-            # Find related offer matches results
-            # Pass list of images matches results to match object (might be more than one image)
-            match = Match(request, offer)
-            if(match.matchPercantage > 70):
-                matches.append(match)
-        return matches
-
-    def search_match_for_offer(self, offer):
-        pass
-
     def init_datasets(self):
         self.init_dataset_offers()
         # dataset_filename = self.get_filename_from_category(2, 2)
@@ -112,6 +91,27 @@ class someClass():
         imagesDir = None
         image_matcher.init_dataset(
             imagesDir, self.get_filename_from_category(category_id, subcategory_id))
+
+    def search_match_for_request(self, request):
+        matches = []
+        # TODO: select filter by request price as well
+        # Select offers according to request info
+        offers = self.database.executeQuery(Queries.getOffers(
+            request[CATEGORY_FIELD], request[SUBCATEGORY_FIELD]))
+        # Init images dataset according to request category
+
+        # Get request's image features
+        # Compare dataset with query features
+        for offer in offers:
+            # Find related offer matches results
+            # Pass list of images matches results to match object (might be more than one image)
+            match = Match(request, offer)
+            if(match.matchPercantage > 70):
+                matches.append(match)
+        return matches
+
+    def search_match_for_offer(self, offer):
+        pass
 
     @staticmethod
     def get_filename_from_category(category_id, subcategory_id):
