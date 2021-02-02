@@ -64,7 +64,7 @@ class ImageMatch(FeatureExtractor):
 
     def save_dataset(self, features, result_file):
         # features = self.extractDirectory(images_directory)
-        hkl.dump(features, result_file)
+        hkl.dump(features, result_file, mode='w')
 
     def load_dataset(self, dataset_path):
         dataset = hkl.load(dataset_path)
@@ -117,7 +117,7 @@ def showImage(image_path, name="result-image"):
 if __name__ == "__main__":
     image_matcher = ImageMatch()
     if not os.path.isfile(DATASET_FILE_NAME):
-        image_matcher.init_dataset(images_dir, DATASET_FILE_NAME)
+        image_matcher.save_dataset(images_dir, DATASET_FILE_NAME)
     scores = image_matcher.search(
         DATASET_FILE_NAME, os.path.join(images_dir, "images (61).jpg"))
 
