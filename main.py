@@ -69,18 +69,28 @@ class someClass():
                 (features, imgs_path), category, subcategory)
 
         # Iterate on offers and append missing features
+        modified_categories_ids = MultiKeysDict()
         for item in offers:
             offer = Offer(item)
+            # Find dataset by category
             category_dataset = categories_dataset.readItem(
                 offer.category, offer.subcategory)
             if category_dataset is None:
-                # TODO: create new dataset file
-                pass
+                category_dataset = ([], [])  # New empty category dataset
+                categories_dataset.newItem(
+                    category_dataset, offer.category, offer.subcategory)
+
+            # Search for new images that aren't in dataset
             for image in offer.images:
-                found = self.image_matcher.find_feature_by_image_path(image)
+                found = self.image_matcher.find_feature_by_image_path(
+                    category_dataset, image)
                 if found is None:
                     # TODO: download new image and append to dataset / create dataset
-                    pass
+                    modified_categories_ids.newItem(
+                        True, offer.category, offer.subcategory)  # Mark dataset as modified
+            # Save updated datasets to file
+            for category, subcategory in modified_categories_ids.items():
+                pass
 
     def init_category_dataset(self, category_id, subcategory_id):
         # TODO: select all images

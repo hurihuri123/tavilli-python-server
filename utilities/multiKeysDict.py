@@ -17,3 +17,6 @@ class MultiKeysDict(object):
             pass  # offset doesn't exists
         finally:
             return item
+
+    def items(self):
+        return self.dict.items()
