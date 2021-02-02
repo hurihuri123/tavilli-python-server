@@ -85,12 +85,17 @@ class someClass():
                 found = self.image_matcher.find_feature_by_image_path(
                     category_dataset, image)
                 if found is None:
-                    # TODO: download new image and append to dataset / create dataset
+                    # TODO: download new image and append to dataset features
                     modified_categories_ids.newItem(
                         True, offer.category, offer.subcategory)  # Mark dataset as modified
             # Save updated datasets to file
             for category, subcategory in modified_categories_ids.items():
-                pass
+                category_dataset = categories_dataset.readItem(
+                    offer.category, offer.subcategory)
+                (category_features, img_paths) = category_dataset
+
+                self.image_matcher.save_dataset(
+                    category_features, self.get_filename_from_category(category, subcategory))
 
     def init_category_dataset(self, category_id, subcategory_id):
         # TODO: select all images
