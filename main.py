@@ -32,9 +32,6 @@ class someClass():
 
     def init_datasets(self):
         self.init_dataset_offers()
-        # dataset_filename = self.get_filename_from_category(2, 2)
-        # if not os.path.isfile(dataset_filename):  # Check if dataset file exists
-        #     self.init_category_dataset(2, 2)
 
     def init_dataset_offers(self):
         # Get all offers
@@ -85,12 +82,6 @@ class someClass():
 
                 self.image_matcher.save_dataset(
                     category_features, self.get_filename_from_category(category, subcategory))
-
-    def init_category_dataset(self, category_id, subcategory_id):
-        # TODO: select all images
-        imagesDir = None
-        image_matcher.init_dataset(
-            imagesDir, self.get_filename_from_category(category_id, subcategory_id))
 
     def search_match_for_request(self, request):
         matches = []
