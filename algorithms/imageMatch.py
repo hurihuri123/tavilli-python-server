@@ -20,16 +20,14 @@ class FeatureExtractor:
         self.model = Model(inputs=base_model.input,
                            outputs=base_model.get_layer('fc1').output)
 
-    def extract(self, img_path):
+    def extract(self, img):
         """
         Extract a deep feature from an input image
         Args:
-            img: 
+            img: from PIL.Image.open(path) or tensorflow.keras.preprocessing.image.load_img(path)
         Returns:
             feature (np.ndarray): deep feature with the shape=(4096, )
         """
-        # open image with PIL.Image.open(path) or tensorflow.keras.preprocessing.image.load_img(path)
-        img = Image.open(img_path)
         img = img.resize((224, 224))  # VGG must take a 224x224 img as an input
         img = img.convert('RGB')  # Make sure img is color
         # To np.array. Height x Width x Channel. dtype=float32
@@ -51,7 +49,7 @@ class FeatureExtractor:
         features = {}
         for img_path in list_images(source_dir):
             # Extract Features
-            feature = self.extract(img_path)
+            feature = self.extract(Image.open(img_path))
             # Extract image name
             image_name = os.path.basename(img_path)  # Extract name from path
             # image_name = os.path.splitext(image_name)[0]  # Extract extention from name
@@ -90,10 +88,11 @@ class ImageMatch(FeatureExtractor):
         finally:
             return feature
 
+    # TODO pass Image opened object instand of path
     def search(self, dataset_path, query_path):
         features, img_paths = self.load_dataset(dataset_path)
         # Calculate query features
-        query_features = self.extract(query_path)
+        query_features = self.extract(Image.open(query_path))
 
         # L2 distances to features
         dists = np.linalg.norm(features-query_features, axis=1)
