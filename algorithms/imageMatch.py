@@ -62,16 +62,26 @@ class ImageMatch(FeatureExtractor):
     def __init__(self):
         super().__init__()
 
-    def save_dataset(self, features, result_file):
-        # features = self.extractDirectory(images_directory)
-        hkl.dump(features, result_file, mode='w')
+    def save_dataset(self, dataset, result_file):
+        dataset_dict = self.convert_dataset_to_dict(dataset)
+        hkl.dump(dataset_dict, result_file, mode='w')
 
     def load_dataset(self, dataset_path):
-        dataset = hkl.load(dataset_path)
+        dataset_dict = hkl.load(dataset_path)
+        return self.convert_dict_to_dataset(dataset_dict)
+
+    def convert_dataset_to_dict(self, dataset):
+        (features, img_paths) = dataset
+        result = {}
+        for index, img_path in enumerate(img_paths):
+            result[img_path] = features[index]
+        return result
+
+    def convert_dict_to_dataset(self, dataset_dict):
         features = []
         img_paths = []
 
-        for key, value in dataset.items():
+        for key, value in dataset_dict.items():
             features.append(value)
             img_paths.append(key)
         features = np.array(features)

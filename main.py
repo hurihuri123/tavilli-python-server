@@ -13,7 +13,7 @@ from imutils.paths import list_images
 from PIL import Image
 import os
 
-# TODO: doc
+# TODO: doc and change name
 
 
 class someClass():
@@ -32,6 +32,7 @@ class someClass():
 
     def init_datasets(self):
         self.init_dataset_offers()
+        # TODO: init requests
 
     def init_dataset_offers(self):
         # Get all offers
@@ -79,12 +80,11 @@ class someClass():
                 for subcategory in subcategories:
                     category_dataset = categories_dataset.readItem(
                         offer.category, offer.subcategory)
-                    (category_features, img_paths) = category_dataset
 
                     filename = self.get_filename_from_category(
                         category, subcategory)
                     self.image_matcher.save_dataset(
-                        category_features, os.path.join(self.offers_directory, filename))
+                        category_dataset, os.path.join(self.offers_directory, filename))
 
     def search_match_for_request(self, request):
         matches = []
