@@ -80,7 +80,6 @@ class someClass():
                     category_dataset = categories_dataset.readItem(
                         offer.category, offer.subcategory)
                     (category_features, img_paths) = category_dataset
-
                     self.image_matcher.save_dataset(
                         category_features, self.get_filename_from_category(category, subcategory))
 
@@ -107,11 +106,11 @@ class someClass():
 
     @staticmethod
     def get_filename_from_category(category_id, subcategory_id):
-        return "{}/{}.hkl".format(category_id, subcategory_id)
+        return "{}_{}.hkl".format(category_id, subcategory_id)
 
     @staticmethod
     def get_category_from_filename(filename):
-        splited = filename.split("/")
+        splited = filename.split("_")
         category = splited[0]
         splited = filename.split(".")
         subcategory = splited[0]
