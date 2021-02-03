@@ -97,7 +97,7 @@ class someClass():
         new_offers = []
         # Get all offers
         offers = self.database.executeQuery(
-            Queries.getOffers(required_images=True))
+            Queries.getOffers())
         # Map each json to offer object
         offers = map(lambda item: Offer(item), offers)
 
@@ -145,6 +145,8 @@ class someClass():
                     category, subcategory)
                 self.image_matcher.save_dataset(
                     category_dataset, os.path.join(self.offers_directory, filename))
+
+        return new_offers
 
     def search_match_for_request(self, request):
         matches = []
