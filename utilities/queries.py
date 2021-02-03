@@ -40,8 +40,18 @@ class Queries():
             autoSubmitValue=auto_submit, extraFilters=query_extra_filters)
 
     @staticmethod
-    def getRequests():
-        return "SELECT {} FROM {}".format(MATCH_FIELDS, REQUESTS_TABLE)
+    def getRequests(start_id=None):
+        where_string = ""
+        query_extra_filters = where_string
+        # Set optional query filter fields
+        if start_id is not None:
+            query_extra_filters += "AND id > {}".format(start_id)
+
+        if query_extra_filters != "":
+            query_extra_filters = "WHERE {}".format(
+                query_extra_filters.replace("AND", ""))  # Remove first "AND" operator
+
+        return "SELECT {matchFields} FROM {table} {extraFilters}".format(matchFields=MATCH_FIELDS, table=REQUESTS_TABLE, extraFilters=query_extra_filters)
 
 
 class Offer(object):

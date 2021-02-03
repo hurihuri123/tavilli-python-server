@@ -39,8 +39,9 @@ class someClass():
         self.init_dataset_requests()
 
     def init_dataset_requests(self):
-        pass
         # Get new requests
+        requests = self.database.executeQuery(
+            Queries.getRequests(start_id=0))  # TODO: read from config file file
         # Map each new request to dataset object
         # Save new requests to dataset files
 
