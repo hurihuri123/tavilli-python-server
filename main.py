@@ -45,6 +45,7 @@ class someClass():
     def init_dataset_requests(self):
         new_requests = []
         categories_dataset = MultiKeysDict()
+        categories_with_images_ids = MultiKeysDict()
 
         last_handled_request_id = self.config_parser.read_config_value(
             CONFIG_LAST_REQUEST_ID_KEY)
@@ -67,25 +68,28 @@ class someClass():
                 category_dataset[0].append(image_features)
                 # Append Image to images array
                 category_dataset[1].append(image)
+                # Mark that category has image
+                categories_with_images_ids.newItem(
+                    True, request.category, request.subcategory)
 
             new_requests.append(request)
 
         # Save new request's features to dataset files
-        for category, subcategories in categories_dataset.items():
+        for category, subcategories in categories_with_images_ids.items():
             for subcategory in subcategories:
                 category_dataset = categories_dataset.readItem(
                     category, subcategory)
-                # TODO : check that category dataset length isn't zero so we wont append empty array
                 filename = self.get_filename_from_category(
                     category, subcategory)
                 # Write/Append new feature to dataset flie
                 self.image_matcher.save_dataset(
                     category_dataset, os.path.join(self.requests_directory, filename), 'a')
 
-        # Get highest request id (requests are ordered by ascending ID)
-        last_request = new_requests[-1]
-        self.config_parser.write_config_value(
-            CONFIG_LAST_REQUEST_ID_KEY, last_request.id)
+        if len(new_requests) > 0:
+            # Get highest request id (requests are ordered by ascending ID)
+            last_request = new_requests[-1]
+            self.config_parser.write_config_value(
+                CONFIG_LAST_REQUEST_ID_KEY, last_request.id)
 
         return new_requests
 
