@@ -51,9 +51,10 @@ class someClass():
         # Get new requests
         requests = self.database.executeQuery(
             Queries.getRequests(start_id=last_handled_request_id))
+        # Map each json to request object
+        requests = map(lambda item: Request(item), requests)
         # Map each new request to dataset object
-        for item in requests:
-            request = Request(item)
+        for request in requests:
             # Find dataset by category
             category_dataset = self.find_or_create_category_dataset(
                 categories_dataset, request.category, request.subcategory)
@@ -74,11 +75,17 @@ class someClass():
             for subcategory in subcategories:
                 category_dataset = categories_dataset.readItem(
                     category, subcategory)
+                # TODO : check that category dataset length isn't zero so we wont append empty array
                 filename = self.get_filename_from_category(
                     category, subcategory)
                 # Write/Append new feature to dataset flie
                 self.image_matcher.save_dataset(
                     category_dataset, os.path.join(self.requests_directory, filename), 'a')
+
+        # Get highest request id (requests are ordered by ascending ID)
+        last_request = new_requests[-1]
+        self.config_parser.write_config_value(
+            CONFIG_LAST_REQUEST_ID_KEY, last_request.id)
 
         return new_requests
 
@@ -87,6 +94,8 @@ class someClass():
         # Get all offers
         offers = self.database.executeQuery(
             Queries.getOffers(required_images=True))
+        # Map each json to offer object
+        offers = map(lambda item: Offer(item), offers)
 
         # Read all existing offers datasets features
         categories_dataset = MultiKeysDict()
@@ -100,8 +109,7 @@ class someClass():
 
         # Iterate on offers and append missing features
         modified_categories_ids = MultiKeysDict()
-        for item in offers:
-            offer = Offer(item)
+        for offer in offers:
             # Find dataset by category
             category_dataset = self.find_or_create_category_dataset(
                 categories_dataset, offer.category, offer.subcategory)

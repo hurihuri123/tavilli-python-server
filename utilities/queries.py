@@ -42,22 +42,29 @@ class Queries():
     @staticmethod
     def getRequests(start_id=None):
         where_string = ""
+        query_orderby = ""
         query_extra_filters = where_string
         # Set optional query filter fields
         if start_id is not None:
             query_extra_filters += "AND id > {}".format(start_id)
+            query_orderby = "ORDER BY id"
 
         if query_extra_filters != "":
             query_extra_filters = "WHERE {}".format(
                 query_extra_filters.replace("AND", ""))  # Remove first "AND" operator
 
-        return "SELECT {matchFields} FROM {table} {extraFilters}".format(matchFields=MATCH_FIELDS, table=REQUESTS_TABLE, extraFilters=query_extra_filters)
+        return "SELECT {matchFields} FROM {table} {extraFilters} {orderBy}".format(matchFields=MATCH_FIELDS,
+                                                                                   table=REQUESTS_TABLE, extraFilters=query_extra_filters, orderBy=query_orderby)
 
 
 class Offer(object):
     def __init__(self, offer):
         super().__init__()
         self.offer = offer
+
+    @property
+    def id(self):
+        return int(self.offer[ID_FIELD])
 
     @property
     def images(self):
@@ -82,6 +89,10 @@ class Request(object):
     def __init__(self, request):
         super().__init__()
         self.request = request
+
+    @property
+    def id(self):
+        return int(self.request[ID_FIELD])
 
     @property
     def images(self):
