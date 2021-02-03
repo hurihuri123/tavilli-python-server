@@ -61,8 +61,8 @@ class Offer(object):
 
     @property
     def category(self):
-        return self.offer[CATEGORY_FIELD]
+        return int(self.offer[CATEGORY_FIELD])
 
     @property
     def subcategory(self):
-        return self.offer[SUBCATEGORY_FIELD]
+        return int(self.offer[SUBCATEGORY_FIELD])

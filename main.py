@@ -3,6 +3,8 @@ from utilities.multiKeysDict import MultiKeysDict
 from utilities.queries import Queries, OFFERS_TABLE, REQUESTS_TABLE, MATCH_FIELDS, CATEGORY_FIELD, SUBCATEGORY_FIELD, Offer
 from utilities.utilities import get_image_from_url
 
+from config.config import DATABASE_HOST, DATABASE_USERNAME, DATEBASE_PASSWORD, DATABASE_NAME
+
 
 from algorithms.match import Match
 from algorithms.imageMatch import ImageMatch
@@ -12,8 +14,10 @@ from imutils.paths import list_images
 
 from PIL import Image
 import os
+from pathlib import Path
 
 # TODO: doc and change name
+DATASET_FILE_EXTENTION = "hkl"
 
 
 class someClass():
@@ -41,10 +45,10 @@ class someClass():
 
         # Read all existing offers datasets features
         categories_dataset = MultiKeysDict()
-        for dataset_file in list_images(self.offers_directory):
+        for dataset_file in Path(self.offers_directory).glob("*.{}".format(DATASET_FILE_EXTENTION)):
             (features, imgs_path) = self.image_matcher.load_dataset(dataset_file)
             category, subcategory = self.get_category_from_filename(
-                dataset_file)
+                dataset_file.stem)
 
             categories_dataset.newItem(
                 (features, imgs_path), category, subcategory)
@@ -109,14 +113,19 @@ class someClass():
 
     @staticmethod
     def get_filename_from_category(category_id, subcategory_id):
-        return "{}_{}.hkl".format(category_id, subcategory_id)
+        return "{}_{}.{}".format(category_id, subcategory_id, DATASET_FILE_EXTENTION)
 
     @staticmethod
     def get_category_from_filename(filename):
         splited = filename.split("_")
-        category = splited[0]
-        splited = filename.split(".")
-        subcategory = splited[0]
+        if len(splited) >= 2:
+            category = int(splited[0])
+            splited = splited[1].split(".")
+            subcategory = int(splited[0])
+        else:
+            category = -1
+            subcategory = -1
+
         return (category, subcategory)
 
 
