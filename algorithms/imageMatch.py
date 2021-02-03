@@ -62,9 +62,9 @@ class ImageMatch(FeatureExtractor):
     def __init__(self):
         super().__init__()
 
-    def save_dataset(self, dataset, result_file):
+    def save_dataset(self, dataset, result_file, command_mode='w'):
         dataset_dict = self.convert_dataset_to_dict(dataset)
-        hkl.dump(dataset_dict, result_file, mode='w')
+        hkl.dump(dataset_dict, result_file, command_mode)
 
     def load_dataset(self, dataset_path):
         dataset_dict = hkl.load(dataset_path)

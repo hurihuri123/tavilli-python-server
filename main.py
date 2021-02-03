@@ -72,8 +72,14 @@ class someClass():
         # Save new request's features to dataset files
         for category, subcategories in categories_dataset.items():
             for subcategory in subcategories:
+                category_dataset = categories_dataset.readItem(
+                    category, subcategory)
+                filename = self.get_filename_from_category(
+                    category, subcategory)
                 # Write/Append new feature to dataset flie
-                pass
+                self.image_matcher.save_dataset(
+                    category_dataset, os.path.join(self.requests_directory, filename), 'a')
+
         return new_requests
 
     def init_dataset_offers(self):
@@ -121,7 +127,7 @@ class someClass():
         for category, subcategories in modified_categories_ids.items():
             for subcategory in subcategories:
                 category_dataset = categories_dataset.readItem(
-                    offer.category, offer.subcategory)
+                    category, subcategory)
 
                 filename = self.get_filename_from_category(
                     category, subcategory)
