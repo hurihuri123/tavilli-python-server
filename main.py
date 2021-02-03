@@ -1,6 +1,6 @@
 from utilities.mySql import MySqlConnector
 from utilities.multiKeysDict import MultiKeysDict
-from utilities.queries import Queries, OFFERS_TABLE, REQUESTS_TABLE, MATCH_FIELDS, CATEGORY_FIELD, SUBCATEGORY_FIELD, Offer
+from utilities.queries import Queries, OFFERS_TABLE, REQUESTS_TABLE, MATCH_FIELDS, CATEGORY_FIELD, SUBCATEGORY_FIELD, Offer, Request
 from utilities.utilities import get_image_from_url
 from utilities.configParser import ConfigParser
 
@@ -43,15 +43,41 @@ class someClass():
         self.init_dataset_requests()
 
     def init_dataset_requests(self):
+        new_requests = []
+        categories_dataset = MultiKeysDict()
+
         last_handled_request_id = self.config_parser.read_config_value(
             CONFIG_LAST_REQUEST_ID_KEY)
         # Get new requests
         requests = self.database.executeQuery(
             Queries.getRequests(start_id=last_handled_request_id))
         # Map each new request to dataset object
-        # Save new requests to dataset files
+        for item in requests:
+            request = Request(item)
+            # Find dataset by category
+            category_dataset = self.find_or_create_category_dataset(
+                categories_dataset, request.category, request.subcategory)
+
+            for image in request.images:
+                # Download image and extract it's features
+                image_features = self.image_matcher.extract(
+                    img=Image.open(get_image_from_url(image)))
+                # Append features to dataset array
+                category_dataset[0].append(image_features)
+                # Append Image to images array
+                category_dataset[1].append(image)
+
+            new_requests.append(request)
+
+        # Save new request's features to dataset files
+        for category, subcategories in categories_dataset.items():
+            for subcategory in subcategories:
+                # Write/Append new feature to dataset flie
+                pass
+        return new_requests
 
     def init_dataset_offers(self):
+        new_offers = []
         # Get all offers
         offers = self.database.executeQuery(
             Queries.getOffers(required_images=True))
@@ -71,12 +97,8 @@ class someClass():
         for item in offers:
             offer = Offer(item)
             # Find dataset by category
-            category_dataset = categories_dataset.readItem(
-                offer.category, offer.subcategory)
-            if category_dataset is None:
-                category_dataset = ([], [])  # New empty category dataset
-                categories_dataset.newItem(
-                    category_dataset, offer.category, offer.subcategory)
+            category_dataset = self.find_or_create_category_dataset(
+                categories_dataset, offer.category, offer.subcategory)
 
             # Search for new images that aren't in dataset
             for image in offer.images:
@@ -88,20 +110,23 @@ class someClass():
                         img=Image.open(get_image_from_url(image)))
                     # Append features to dataset
                     category_dataset[0].append(image_features)
-                    category_dataset[1].append(image)  # Append Image path
+                    # Append Image to images array
+                    category_dataset[1].append(image)
                     # Mark dataset as modified
                     modified_categories_ids.newItem(
                         True, offer.category, offer.subcategory)
-            # Save updated datasets to file
-            for category, subcategories in modified_categories_ids.items():
-                for subcategory in subcategories:
-                    category_dataset = categories_dataset.readItem(
-                        offer.category, offer.subcategory)
+            new_offers.append(offer)
 
-                    filename = self.get_filename_from_category(
-                        category, subcategory)
-                    self.image_matcher.save_dataset(
-                        category_dataset, os.path.join(self.offers_directory, filename))
+        # Save updated datasets to file
+        for category, subcategories in modified_categories_ids.items():
+            for subcategory in subcategories:
+                category_dataset = categories_dataset.readItem(
+                    offer.category, offer.subcategory)
+
+                filename = self.get_filename_from_category(
+                    category, subcategory)
+                self.image_matcher.save_dataset(
+                    category_dataset, os.path.join(self.offers_directory, filename))
 
     def search_match_for_request(self, request):
         matches = []
@@ -120,6 +145,15 @@ class someClass():
             if(match.matchPercantage > 70):
                 matches.append(match)
         return matches
+
+    def find_or_create_category_dataset(self,  categories_dataset, category, subcategory):
+        category_dataset = categories_dataset.readItem(
+            category, subcategory)
+        if category_dataset is None:
+            category_dataset = ([], [])  # New empty category dataset
+            categories_dataset.newItem(
+                category_dataset, category, subcategory)
+        return category_dataset
 
     def search_match_for_offer(self, offer):
         pass

@@ -1,6 +1,6 @@
 
 
-from config.config import DATABASE_NAME, OFFERS_IMAGES_FOLDER
+from config.config import DATABASE_NAME, OFFERS_IMAGES_FOLDER, REQUESTS_IMAGES_FOLDER
 # Tables
 OFFERS_TABLE = "offers"
 REQUESTS_TABLE = "requests"
@@ -76,3 +76,27 @@ class Offer(object):
     @property
     def subcategory(self):
         return int(self.offer[SUBCATEGORY_FIELD])
+
+
+class Request(object):
+    def __init__(self, request):
+        super().__init__()
+        self.request = request
+
+    @property
+    def images(self):
+        result = []
+        if(self.request[IMAGES_FIELD] != ""):
+            images = self.request[IMAGES_FIELD].split(",")
+            # Append full path to each image name
+            return map(lambda image_name: REQUESTS_IMAGES_FOLDER + "/" + image_name, images)
+
+        return result
+
+    @property
+    def category(self):
+        return int(self.request[CATEGORY_FIELD])
+
+    @property
+    def subcategory(self):
+        return int(self.request[SUBCATEGORY_FIELD])
