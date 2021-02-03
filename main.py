@@ -36,7 +36,13 @@ class someClass():
 
     def init_datasets(self):
         self.init_dataset_offers()
-        # TODO: init requests
+        self.init_dataset_requests()
+
+    def init_dataset_requests(self):
+        pass
+        # Get new requests
+        # Map each new request to dataset object
+        # Save new requests to dataset files
 
     def init_dataset_offers(self):
         # Get all offers
@@ -109,6 +115,13 @@ class someClass():
         return matches
 
     def search_match_for_offer(self, offer):
+        pass
+
+    def new_request(self):
+        pass
+        # TODO: update "lastRequestId field"
+
+    def new_offer(self):
         pass
 
     @staticmethod
