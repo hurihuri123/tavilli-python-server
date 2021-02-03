@@ -20,12 +20,19 @@ class ConfigParser(object):
             return value
 
     def write_config_value(self, key, value):
-        command = "a" if os.path.exists(CONFIG_FILE_NAME) else "w"
+        # TODO: organize function and avoid code duplication
         try:
-            with open(CONFIG_FILE_NAME, command) as f:
-                data = {}
-                data[key] = value
-                json.dump(data, f)
+            if os.path.exists(CONFIG_FILE_NAME):
+                with open(CONFIG_FILE_NAME, 'r') as f:
+                    config = json.load(f)
+                config[key] = value
+                with open(CONFIG_FILE_NAME, 'w') as f:
+                    json.dump(config, f)
+            else:
+                config = {}
+                config[key] = value
+                with open(CONFIG_FILE_NAME, 'w') as f:
+                    json.dump(config, f)
             return True
         except:
             print("Error writing value to config file")

@@ -2,6 +2,7 @@ from utilities.mySql import MySqlConnector
 from utilities.multiKeysDict import MultiKeysDict
 from utilities.queries import Queries, OFFERS_TABLE, REQUESTS_TABLE, MATCH_FIELDS, CATEGORY_FIELD, SUBCATEGORY_FIELD, Offer
 from utilities.utilities import get_image_from_url
+from utilities.configParser import ConfigParser
 
 from config.config import DATABASE_HOST, DATABASE_USERNAME, DATEBASE_PASSWORD, DATABASE_NAME
 
@@ -19,6 +20,8 @@ from pathlib import Path
 # TODO: doc and change name
 DATASET_FILE_EXTENTION = "hkl"
 
+CONFIG_LAST_REQUEST_ID_KEY = "lastRequestId"
+
 
 class someClass():
     def __init__(self):
@@ -26,6 +29,7 @@ class someClass():
         self.database = MySqlConnector(
             DATABASE_HOST, DATABASE_USERNAME, DATEBASE_PASSWORD, DATABASE_NAME)
         self.image_matcher = ImageMatch()
+        self.config_parser = ConfigParser()
 
         current_directory = os.path.dirname(__file__)
         dataset_directory = os.path.join(current_directory, "dataset")
@@ -39,9 +43,11 @@ class someClass():
         self.init_dataset_requests()
 
     def init_dataset_requests(self):
+        last_handled_request_id = self.config_parser.read_config_value(
+            CONFIG_LAST_REQUEST_ID_KEY)
         # Get new requests
         requests = self.database.executeQuery(
-            Queries.getRequests(start_id=0))  # TODO: read from config file file
+            Queries.getRequests(start_id=last_handled_request_id))
         # Map each new request to dataset object
         # Save new requests to dataset files
 
