@@ -36,7 +36,7 @@ class someClass():
         self.offers_directory = os.path.join(dataset_directory, "offers")
         self.requests_directory = os.path.join(dataset_directory, "requests")
 
-        self.init_datasets()
+        # self.init_datasets()
 
     def init_datasets(self):
         new_offers = self.init_dataset_offers()
@@ -151,11 +151,13 @@ class someClass():
         return new_offers
 
     def search_match_for_request(self, request):
-        matches = []
         # TODO: select filter by request price as well
         # Select offers according to request info
         offers = self.database.executeQuery(Queries.getOffers(
             request.category, request.subcategory))
+        offers = map(lambda item: Offer(item), offers)
+
+        request_images_matches = []
         request_images = request.images
         if(len(request_images) > 0):
             # Load offers images dataset according to request category
@@ -170,13 +172,15 @@ class someClass():
                     # Calculate image match percatage
                     image_matches = self.image_matcher.calculate_matches(
                         dataset, img)
-                    # TODO: set highest match for each offer
+                    request_images_matches.append(image_matches)
 
+        matches = []
         # Compare dataset with query features
         for offer in offers:
-            # Find related offer matches results
-            # Pass list of images matches results to match object (might be more than one image)
-            match = Match(request, offer)
+            # Find best 2 images matches
+            images_match_score = self.image_matcher.find_images_best_matches(
+                offer.images, request_images_matches)
+            match = Match(request, offer, images_match_score)
             if(match.matchPercantage > 70):
                 matches.append(match)
         return matches

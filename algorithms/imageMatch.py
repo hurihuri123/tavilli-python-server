@@ -110,7 +110,7 @@ class ImageMatch(FeatureExtractor):
     # TODO pass Image opened object instand of path
     #
         """
-        Iterate threw directory and extract feature for each image
+        
         Args:
             dataset: loaded dataset with (features, img_paths) tuple
             img: from PIL.Image.open(path) or tensorflow.keras.preprocessing.image.load_img(path)
@@ -130,6 +130,46 @@ class ImageMatch(FeatureExtractor):
             scores[img_paths[index]] = score
 
         return scores
+
+        """        
+        Args:
+            images: array of image_paths stings
+            match_scores: result object from "calculate_matches"
+        Returns:
+            Best match score existing in the images array
+        """
+
+    def find_images_best_match(self, images, match_scores):
+        lowest_distance = None
+        for image in images:
+            try:
+                score = match_scores[image]
+                if lowest_distance is None:
+                    lowest_distance = score
+                elif score < lowest_distance:
+                    lowest_distance = score
+            except:
+                pass
+        return lowest_distance
+
+        """        
+        Args:
+            images: array of image_paths stings
+            matches_scores_list: list of result object from "calculate_matches"
+        Returns:
+            Best match score existing in the images array
+        """
+
+    def find_images_best_matches(self, images, matches_scores_list):
+        best_match = None
+        for scores in matches_scores_list:
+            score = self.find_images_best_match(images, scores)
+            if best_match is None:
+                best_match = score
+            elif score < best_match:
+                best_match = score
+
+        return best_match
 
 
 DATASET_FILE_NAME = "dataset.hkl"
