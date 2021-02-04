@@ -72,7 +72,8 @@ class Offer(object):
         if(self.offer[IMAGES_FIELD] != ""):
             images = self.offer[IMAGES_FIELD].split(",")
             # Append full path to each image name
-            return map(lambda image_name: OFFERS_IMAGES_FOLDER + "/" + image_name, images)
+            for image in images:
+                result.append(OFFERS_IMAGES_FOLDER + "/" + image)
 
         return result
 
@@ -100,7 +101,8 @@ class Request(object):
         if(self.request[IMAGES_FIELD] != ""):
             images = self.request[IMAGES_FIELD].split(",")
             # Append full path to each image name
-            return map(lambda image_name: REQUESTS_IMAGES_FOLDER + "/" + image_name, images)
+            for image in images:
+                result.append(REQUESTS_IMAGES_FOLDER + "/" + image)
 
         return result
 

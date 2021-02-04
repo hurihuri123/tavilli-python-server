@@ -73,6 +73,12 @@ class ImageMatch(FeatureExtractor):
             dataset_dict = {}
         return self.convert_dict_to_dataset(dataset_dict)
 
+    def is_dataset_empty(self, dataset):
+        if not dataset:
+            return True
+        (features, img_paths) = dataset
+        return len(img_paths) > 0 and len(features) > 0
+
     def convert_dataset_to_dict(self, dataset):
         (features, img_paths) = dataset
         result = {}

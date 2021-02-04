@@ -36,7 +36,7 @@ class someClass():
         self.offers_directory = os.path.join(dataset_directory, "offers")
         self.requests_directory = os.path.join(dataset_directory, "requests")
 
-        # self.init_datasets()
+        self.init_datasets()
 
     def init_datasets(self):
         new_offers = self.init_dataset_offers()
@@ -157,18 +157,20 @@ class someClass():
         offers = self.database.executeQuery(Queries.getOffers(
             request.category, request.subcategory))
         request_images = request.images
-        if(len(list(request_images)) > 0):  # Convert map object to list and check length
+        if(len(request_images) > 0):
             # Load offers images dataset according to request category
             dataset_path = os.path.join(self.offers_directory, self.get_filename_from_category(
                 request.category, request.subcategory))
             dataset = self.image_matcher.load_dataset(dataset_path)
-            for image in request_images:
-                # Download and open image
-                img = Image.open(get_image_from_url(image))
-                # Calculate image match percatage
-                image_matches = self.image_matcher.calculate_matches(
-                    dataset, img)
-                # TODO: set highest match for each offer
+
+            if self.image_matcher.is_dataset_empty(dataset) == False:
+                for image in request_images:
+                    # Download and open image
+                    img = Image.open(get_image_from_url(image))
+                    # Calculate image match percatage
+                    image_matches = self.image_matcher.calculate_matches(
+                        dataset, img)
+                    # TODO: set highest match for each offer
 
         # Compare dataset with query features
         for offer in offers:
