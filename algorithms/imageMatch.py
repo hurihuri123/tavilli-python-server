@@ -67,7 +67,10 @@ class ImageMatch(FeatureExtractor):
         hkl.dump(dataset_dict, result_file, command_mode)
 
     def load_dataset(self, dataset_path):
-        dataset_dict = hkl.load(dataset_path)
+        if os.path.exists(dataset_path):
+            dataset_dict = hkl.load(dataset_path)
+        else:
+            dataset_dict = {}
         return self.convert_dict_to_dataset(dataset_dict)
 
     def convert_dataset_to_dict(self, dataset):
@@ -99,10 +102,20 @@ class ImageMatch(FeatureExtractor):
             return feature
 
     # TODO pass Image opened object instand of path
-    def search(self, dataset_path, query_path):
-        features, img_paths = self.load_dataset(dataset_path)
-        # Calculate query features
-        query_features = self.extract(Image.open(query_path))
+    #
+        """
+        Iterate threw directory and extract feature for each image
+        Args:
+            dataset: loaded dataset with (features, img_paths) tuple
+            img: from PIL.Image.open(path) or tensorflow.keras.preprocessing.image.load_img(path)
+        Returns:
+            list with match perectage for each feature
+        """
+
+    def calculate_matches(self, dataset, img):
+        features, img_paths = dataset
+        # Calculate new image features
+        query_features = self.extract(img)
 
         # L2 distances to features
         dists = np.linalg.norm(features-query_features, axis=1)

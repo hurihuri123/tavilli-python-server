@@ -36,11 +36,13 @@ class someClass():
         self.offers_directory = os.path.join(dataset_directory, "offers")
         self.requests_directory = os.path.join(dataset_directory, "requests")
 
-        self.init_datasets()
+        # self.init_datasets()
 
     def init_datasets(self):
-        self.init_dataset_offers()
-        self.init_dataset_requests()
+        new_offers = self.init_dataset_offers()
+        new_requests = self.init_dataset_requests()
+        for request in new_requests:
+            matches = self.search_match_for_request(request)
 
     def init_dataset_requests(self):
         new_requests = []
@@ -153,10 +155,20 @@ class someClass():
         # TODO: select filter by request price as well
         # Select offers according to request info
         offers = self.database.executeQuery(Queries.getOffers(
-            request[CATEGORY_FIELD], request[SUBCATEGORY_FIELD]))
-        # Init images dataset according to request category
-
-        # Get request's image features
+            request.category, request.subcategory))
+        request_images = request.images
+        if(len(list(request_images)) > 0):  # Convert map object to list and check length
+            # Load offers images dataset according to request category
+            dataset_path = os.path.join(self.offers_directory, self.get_filename_from_category(
+                request.category, request.subcategory))
+            dataset = self.image_matcher.load_dataset(dataset_path)
+            for image in request_images:
+                # Download and open image
+                img = Image.open(get_image_from_url(image))
+                # Calculate image match percatage
+                image_matches = self.image_matcher.calculate_matches(
+                    dataset, img)
+            # TODO: set highest match for each offer
         # Compare dataset with query features
         for offer in offers:
             # Find related offer matches results
@@ -205,6 +217,7 @@ class someClass():
 
 if __name__ == "__main__":
     some_class_object = someClass()
-
     requests = some_class_object.database.executeQuery(Queries.getRequests())
-    matches = some_class_object.search_match_for_request(requests[0])
+    requests = map(lambda item: Request(item), requests)
+    for request in requests:
+        matches = some_class_object.search_match_for_request(request)
