@@ -77,7 +77,7 @@ class ImageMatch(FeatureExtractor):
         if not dataset:
             return True
         (features, img_paths) = dataset
-        return len(img_paths) > 0 and len(features) > 0
+        return len(img_paths) == 0 or len(features) == 0
 
     def convert_dataset_to_dict(self, dataset):
         (features, img_paths) = dataset
@@ -115,18 +115,20 @@ class ImageMatch(FeatureExtractor):
             dataset: loaded dataset with (features, img_paths) tuple
             img: from PIL.Image.open(path) or tensorflow.keras.preprocessing.image.load_img(path)
         Returns:
-            list with match perectage for each feature
+            Matches results as dict with "image_path" as a key and "match score" as value
         """
 
     def calculate_matches(self, dataset, img):
+        scores = {}
         features, img_paths = dataset
         # Calculate new image features
         query_features = self.extract(img)
 
         # L2 distances to features
         dists = np.linalg.norm(features-query_features, axis=1)
-        ids = np.argsort(dists)  # Ascending sort
-        scores = [(dists[id], img_paths[id]) for id in ids]
+        for index, score in enumerate(dists):
+            scores[img_paths[index]] = score
+
         return scores
 
 
