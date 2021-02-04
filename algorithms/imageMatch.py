@@ -119,7 +119,7 @@ class ImageMatch(FeatureExtractor):
 
         # L2 distances to features
         dists = np.linalg.norm(features-query_features, axis=1)
-        ids = np.argsort(dists)[:30]  # Top 30 results
+        ids = np.argsort(dists)  # Ascending sort
         scores = [(dists[id], img_paths[id]) for id in ids]
         return scores
 

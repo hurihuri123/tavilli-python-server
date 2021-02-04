@@ -168,7 +168,8 @@ class someClass():
                 # Calculate image match percatage
                 image_matches = self.image_matcher.calculate_matches(
                     dataset, img)
-            # TODO: set highest match for each offer
+                # TODO: set highest match for each offer
+
         # Compare dataset with query features
         for offer in offers:
             # Find related offer matches results
