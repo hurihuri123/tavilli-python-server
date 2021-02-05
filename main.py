@@ -21,6 +21,7 @@ from pathlib import Path
 DATASET_FILE_EXTENTION = "hkl"
 
 CONFIG_LAST_REQUEST_ID_KEY = "lastRequestId"
+MIN_MATCH_RATE = 0
 
 
 class someClass():
@@ -36,13 +37,19 @@ class someClass():
         self.offers_directory = os.path.join(dataset_directory, "offers")
         self.requests_directory = os.path.join(dataset_directory, "requests")
 
-        # self.init_datasets()
+        self.init_datasets()
 
     def init_datasets(self):
         new_offers = self.init_dataset_offers()
         new_requests = self.init_dataset_requests()
+        matches = []
         for request in new_requests:
-            matches = self.search_match_for_request(request)
+            matches = matches + self.search_match_for_request(request)
+        for offer in new_offers:
+            matches = matches + self.search_match_for_offer(offer)
+        # TODO: search for duplications
+        for match in matches:
+            print(match)
 
     def init_dataset_requests(self):
         new_requests = []
@@ -157,7 +164,7 @@ class someClass():
             request.category, request.subcategory))
         offers = map(lambda item: Offer(item), offers)
 
-        request_images_matches = []
+        match_images_results = []
         request_images = request.images
         if(len(request_images) > 0):
             # Load offers images dataset according to request category
@@ -172,17 +179,54 @@ class someClass():
                     # Calculate image match percatage
                     image_matches = self.image_matcher.calculate_matches(
                         dataset, img)
-                    request_images_matches.append(image_matches)
+                    match_images_results.append(image_matches)
 
         matches = []
         # Compare dataset with query features
         for offer in offers:
             # Find best 2 images matches
             images_match_score = self.image_matcher.find_images_best_matches(
-                offer.images, request_images_matches)
+                offer.images, match_images_results)
             match = Match(request, offer, images_match_score)
-            if(match.matchPercantage > 70):
+            if(match.matchPercantage >= MIN_MATCH_RATE):
                 matches.append(match)
+                # TODO: see if passing request + offer id would be enough instand of all object
+        return matches
+
+    def search_match_for_offer(self, offer):
+        # TODO: select filter by request price as well
+        # Select requests according to request info
+        requests = self.database.executeQuery(Queries.getRequests(
+            offer.category, offer.subcategory))
+        requests = map(lambda item: Request(item), requests)
+
+        match_images_results = []
+        offer_images = offer.images
+        if(len(offer_images) > 0):
+            # Load requests images dataset according to offer's category
+            dataset_path = os.path.join(self.requests_directory, self.get_filename_from_category(
+                offer.category, offer.subcategory))
+            dataset = self.image_matcher.load_dataset(dataset_path)
+
+            if self.image_matcher.is_dataset_empty(dataset) == False:
+                for image in offer_images:
+                    # Download and open image
+                    img = Image.open(get_image_from_url(image))
+                    # Calculate image match percatage
+                    image_matches = self.image_matcher.calculate_matches(
+                        dataset, img)
+                    match_images_results.append(image_matches)
+
+        matches = []
+        # Compare dataset with query features
+        for request in requests:
+            # Find best 2 images matches
+            images_match_score = self.image_matcher.find_images_best_matches(
+                request.images, match_images_results)
+            match = Match(request, offer, images_match_score)
+            if(match.matchPercantage >= MIN_MATCH_RATE):
+                matches.append(match)
+                # TODO: see if passing request + offer id would be enough instand of all object
         return matches
 
     def find_or_create_category_dataset(self,  categories_dataset, category, subcategory):
@@ -193,16 +237,6 @@ class someClass():
             categories_dataset.newItem(
                 category_dataset, category, subcategory)
         return category_dataset
-
-    def search_match_for_offer(self, offer):
-        pass
-
-    def new_request(self):
-        pass
-        # TODO: update "lastRequestId field"
-
-    def new_offer(self):
-        pass
 
     @staticmethod
     def get_filename_from_category(category_id, subcategory_id):
@@ -224,7 +258,3 @@ class someClass():
 
 if __name__ == "__main__":
     some_class_object = someClass()
-    requests = some_class_object.database.executeQuery(Queries.getRequests())
-    requests = map(lambda item: Request(item), requests)
-    for request in requests:
-        matches = some_class_object.search_match_for_request(request)

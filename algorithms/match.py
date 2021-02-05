@@ -44,4 +44,4 @@ class Match(object):
         return sum
 
     def __str__(self):
-        return "requestId {}, offerId {} has {}% match".format(self.request[ID_FIELD], self.offer[ID_FIELD], self.matchPercantage)
+        return "requestId {}, offerId {} has {}% match".format(self.request.id, self.offer.id, self.matchPercantage)

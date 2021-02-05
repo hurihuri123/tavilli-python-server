@@ -21,7 +21,6 @@ MATCH_FIELDS = "{},ownerId,{},{},{},{},{},{}".format(
 
 
 class Queries():
-    # TODO: filter by category
     @staticmethod
     def getOffers(category_id=None, subcategory_id=None, required_images=False, auto_submit=True):
         query_extra_filters = ""
@@ -40,7 +39,7 @@ class Queries():
             autoSubmitValue=auto_submit, extraFilters=query_extra_filters)
 
     @staticmethod
-    def getRequests(start_id=None):
+    def getRequests(start_id=None, category_id=None, subcategory_id=None):
         where_string = ""
         query_orderby = ""
         query_extra_filters = where_string
@@ -48,10 +47,14 @@ class Queries():
         if start_id is not None:
             query_extra_filters += "AND id > {}".format(start_id)
             query_orderby = "ORDER BY id"
+        if category_id is not None and subcategory_id is not None:
+            query_extra_filters += "AND {category} = {categoryValue} AND {subcategory} = {subcategoryValue}".format(
+                category=CATEGORY_FIELD,
+                categoryValue=category_id, subcategory=SUBCATEGORY_FIELD, subcategoryValue=subcategory_id)
 
         if query_extra_filters != "":
             query_extra_filters = "WHERE {}".format(
-                query_extra_filters.replace("AND", ""))  # Remove first "AND" operator
+                query_extra_filters.replace("AND", "", 1))  # Remove first "AND" operator
 
         return "SELECT {matchFields} FROM {table} {extraFilters} {orderBy}".format(matchFields=MATCH_FIELDS,
                                                                                    table=REQUESTS_TABLE, extraFilters=query_extra_filters, orderBy=query_orderby)
