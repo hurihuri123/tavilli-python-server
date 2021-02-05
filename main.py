@@ -197,7 +197,7 @@ class someClass():
         # TODO: select filter by request price as well
         # Select requests according to request info
         requests = self.database.executeQuery(Queries.getRequests(
-            offer.category, offer.subcategory))
+            category_id=offer.category, subcategory_id=offer.subcategory))
         requests = map(lambda item: Request(item), requests)
 
         match_images_results = []
