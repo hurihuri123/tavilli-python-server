@@ -1,6 +1,7 @@
 from algorithms.textMatch import calculateTextMatch
 from algorithms.imageMatch import ImageMatch
 from utilities.queries import *
+from utilities.utilities import round_float_number
 
 
 class Match(object):
@@ -41,7 +42,7 @@ class Match(object):
         sum = 0
         if(self.images):
             sum = sum + self.images
-        return sum
+        return round_float_number(sum)
 
     def __str__(self):
         return "requestId {}, offerId {} has {}% match".format(self.request.id, self.offer.id, self.matchPercantage)
