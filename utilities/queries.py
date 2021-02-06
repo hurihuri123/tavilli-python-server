@@ -18,6 +18,8 @@ STATUS_FIELD = "status"
 
 # Static values
 OPEN_STATUS = 1
+REQUEST_OBJECT_NAME = "request"
+OFFER_OBJECT_NAME = "offer"
 
 MATCH_FIELDS = "{},ownerId,{},{},{},{},{},{}".format(
     DESCRIPTION_FIELD, IMAGES_FIELD, TITLE_FIELD, PRICE_FIELD, ID_FIELD, CATEGORY_FIELD, SUBCATEGORY_FIELD)
@@ -92,6 +94,9 @@ class Offer(object):
     def subcategory(self):
         return int(self.offer[SUBCATEGORY_FIELD])
 
+    def __str__(self):
+        return OFFER_OBJECT_NAME
+
 
 class Request(object):
     def __init__(self, request):
@@ -120,3 +125,6 @@ class Request(object):
     @property
     def subcategory(self):
         return int(self.request[SUBCATEGORY_FIELD])
+
+    def __str__(self):
+        return REQUEST_OBJECT_NAME

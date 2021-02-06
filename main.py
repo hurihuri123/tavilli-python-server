@@ -1,6 +1,6 @@
 from utilities.mySql import MySqlConnector
 from utilities.multiKeysDict import MultiKeysDict
-from utilities.queries import Queries, OFFERS_TABLE, REQUESTS_TABLE, MATCH_FIELDS, CATEGORY_FIELD, SUBCATEGORY_FIELD, Offer, Request
+from utilities.queries import Queries, OFFERS_TABLE, REQUESTS_TABLE, MATCH_FIELDS, CATEGORY_FIELD, SUBCATEGORY_FIELD, Offer, Request, REQUEST_OBJECT_NAME, OFFER_OBJECT_NAME
 from utilities.utilities import get_image_from_url
 from utilities.configParser import ConfigParser
 
@@ -45,9 +45,11 @@ class someClass():
         new_requests = self.init_dataset_requests()
         matches = []
         for request in new_requests:
-            matches = matches + self.search_match_for_request(request)
+            matches = matches + self.search_matches(item=request, other_item_type=Offer,
+                                                    select_other_items_callback=Queries.getOffers, other_items_dir=self.offers_directory)
         for offer in new_offers:
-            matches = matches + self.search_match_for_offer(offer)
+            matches = matches + self.search_matches(item=offer, other_item_type=Request,
+                                                    select_other_items_callback=Queries.getRequests, other_items_dir=self.requests_directory)
         # TODO: search for duplications
         for match in matches:
             print(match)
@@ -121,23 +123,23 @@ class someClass():
 
         return new_items
 
-    def search_match_for_request(self, request):
-        # TODO: select filter by request price as well
-        # Select offers according to request info
-        offers = self.database.executeQuery(Queries.getOffers(
-            request.category, request.subcategory))
-        offers = map(lambda item: Offer(item), offers)
+    def search_matches(self, item, other_item_type, select_other_items_callback, other_items_dir):
+        # TODO: select filter by item price as well
+        other_items = self.database.executeQuery(select_other_items_callback(
+            item.category, item.subcategory))
+        other_items = map(lambda other_item: other_item_type(
+            other_item), other_items)
 
         match_images_results = []
-        request_images = request.images
-        if(len(request_images) > 0):
-            # Load offers images dataset according to request category
-            dataset_path = os.path.join(self.offers_directory, self.get_filename_from_category(
-                request.category, request.subcategory))
+        item_images = item.images
+        if(len(item_images) > 0):
+            # Load items images dataset according to item category
+            dataset_path = os.path.join(other_items_dir, self.get_filename_from_category(
+                item.category, item.subcategory))
             dataset = self.image_matcher.load_dataset(dataset_path)
 
             if self.image_matcher.is_dataset_empty(dataset) == False:
-                for image in request_images:
+                for image in item_images:
                     # Download and open image
                     img = Image.open(get_image_from_url(image))
                     # Calculate image match percatage
@@ -147,11 +149,18 @@ class someClass():
 
         matches = []
         # Compare dataset with query features
-        for offer in offers:
+        for other_item in other_items:
             # Find best 2 images matches
             images_match_score = self.image_matcher.find_images_best_matches(
-                offer.images, match_images_results)
-            match = Match(request, offer, images_match_score)
+                item.images, match_images_results)
+
+            if item.__str__() == REQUEST_OBJECT_NAME:
+                match = Match(request=item, offer=other_item,
+                              images_distance=images_match_score)
+            else:
+                match = Match(
+                    request=other_item, offer=item, images_distance=images_match_score)
+
             if(match.matchPercantage >= MIN_MATCH_RATE):
                 matches.append(match)
                 # TODO: see if passing request + offer id would be enough instand of all object
