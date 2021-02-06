@@ -25,10 +25,14 @@ MATCH_FIELDS = "{},ownerId,{},{},{},{},{},{}".format(
 
 class Queries():
     @staticmethod
-    def getOffers(category_id=None, subcategory_id=None, required_images=False, auto_submit=True, status=OPEN_STATUS):
+    def getOffers(start_id=None, category_id=None, subcategory_id=None, required_images=False, auto_submit=True, status=OPEN_STATUS):
+        query_orderby = ""
         query_extra_filters = ""
 
         # Set optional query filter fields
+        if start_id is not None:
+            query_extra_filters += "AND id > {}".format(start_id)
+            query_orderby = "ORDER BY id"
         if category_id is not None and subcategory_id is not None:
             query_extra_filters += "AND {category} = {categoryValue} AND {subcategory} = {subcategoryValue}".format(
                 category=CATEGORY_FIELD,
@@ -37,15 +41,15 @@ class Queries():
             query_extra_filters += "AND {images} != ''".format(
                 images=IMAGES_FIELD)
 
-        return "SELECT {matchFields} FROM {table} WHERE {statusField} = {statusValue} AND {autoSubmit} = {autoSubmitValue} {extraFilters}".format(
+        return "SELECT {matchFields} FROM {table} WHERE {statusField} = {statusValue} AND {autoSubmit} = {autoSubmitValue} {extraFilters} {orderBy}".format(
             matchFields=MATCH_FIELDS, table=OFFERS_TABLE, statusField=STATUS_FIELD, statusValue=status, autoSubmit=AUTO_SUBMIT_FIELD,
-            autoSubmitValue=auto_submit, extraFilters=query_extra_filters)
+            autoSubmitValue=auto_submit, extraFilters=query_extra_filters, orderBy=query_orderby)
 
     @staticmethod
     def getRequests(start_id=None, category_id=None, subcategory_id=None, status=OPEN_STATUS):
-        where_string = ""
         query_orderby = ""
-        query_extra_filters = where_string
+        query_extra_filters = ""
+
         # Set optional query filter fields
         if start_id is not None:
             query_extra_filters += "AND id > {}".format(start_id)

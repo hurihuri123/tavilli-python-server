@@ -127,9 +127,12 @@ class someClass():
 
     def init_dataset_offers(self):
         new_offers = []
+
+        last_handled_offer_id = self.config_parser.read_config_value(
+            CONFIG_LAST_OFFER_ID_KEY)
         # Get all offers
         offers = self.database.executeQuery(
-            Queries.getOffers())
+            Queries.getOffers(start_id=last_handled_offer_id))
         # Map each json to offer object
         offers = map(lambda item: Offer(item), offers)
 
