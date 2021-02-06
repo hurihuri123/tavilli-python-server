@@ -7,6 +7,7 @@ from PIL import Image
 from imutils.paths import list_images
 import ntpath
 from pathlib import Path
+from utilities.utilities import list_to_nparray
 import hickle as hkl
 
 import cv2  # Temporary import (just for show)
@@ -28,6 +29,7 @@ class FeatureExtractor:
         Returns:
             feature (np.ndarray): deep feature with the shape=(4096, )
         """
+        print("Extracting feature for image")
         img = img.resize((224, 224))  # VGG must take a 224x224 img as an input
         img = img.convert('RGB')  # Make sure img is color
         # To np.array. Height x Width x Channel. dtype=float32
@@ -62,9 +64,9 @@ class ImageMatch(FeatureExtractor):
     def __init__(self):
         super().__init__()
 
-    def save_dataset(self, dataset, result_file, command_mode='w'):
+    def save_dataset(self, dataset, dataset_path, command_mode='a'):
         dataset_dict = self.convert_dataset_to_dict(dataset)
-        hkl.dump(dataset_dict, result_file, command_mode)
+        hkl.dump(dataset_dict, dataset_path, command_mode)
 
     def load_dataset(self, dataset_path):
         if os.path.exists(dataset_path):
@@ -113,17 +115,14 @@ class ImageMatch(FeatureExtractor):
         
         Args:
             dataset: loaded dataset with (features, img_paths) tuple
-            img: from PIL.Image.open(path) or tensorflow.keras.preprocessing.image.load_img(path)
+            query features: result extracted image features 
         Returns:
             Matches results as dict with "image_path" as a key and "match score" as value
         """
 
-    def calculate_matches(self, dataset, img):
+    def calculate_matches(self, dataset, query_features):
         scores = {}
         features, img_paths = dataset
-        # Calculate new image features
-        query_features = self.extract(img)
-
         # L2 distances to features
         dists = np.linalg.norm(features-query_features, axis=1)
         for index, score in enumerate(dists):

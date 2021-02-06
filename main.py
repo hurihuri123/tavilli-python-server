@@ -1,7 +1,7 @@
 from utilities.mySql import MySqlConnector
 from utilities.multiKeysDict import MultiKeysDict
 from utilities.queries import Queries, OFFERS_TABLE, REQUESTS_TABLE, MATCH_FIELDS, CATEGORY_FIELD, SUBCATEGORY_FIELD, Offer, Request, REQUEST_OBJECT_NAME, OFFER_OBJECT_NAME
-from utilities.utilities import get_image_from_url
+from utilities.utilities import get_image_from_url, list_to_nparray
 from utilities.configParser import ConfigParser
 
 from config.config import DATABASE_HOST, DATABASE_USERNAME, DATEBASE_PASSWORD, DATABASE_NAME
@@ -16,6 +16,7 @@ from imutils.paths import list_images
 from PIL import Image
 import os
 from pathlib import Path
+import numpy as np
 
 # TODO: doc and change name
 DATASET_FILE_EXTENTION = "hkl"
@@ -113,7 +114,7 @@ class someClass():
                     category, subcategory)
                 # Write/Append new feature to dataset flie
                 self.image_matcher.save_dataset(
-                    category_dataset, os.path.join(items_directory_path, filename), 'a')
+                    category_dataset, os.path.join(items_directory_path, filename))
 
         if len(new_items) > 0:
             # Get highest request id (requests are ordered by ascending ID)
@@ -133,22 +134,32 @@ class someClass():
         match_images_results = []
         item_images = item.images
         if(len(item_images) > 0):
-            # Load items images dataset according to item category
+            # Load  images dataset according to item category
             dataset_path = os.path.join(other_items_dir, self.get_filename_from_category(
                 item.category, item.subcategory))
             dataset = self.image_matcher.load_dataset(dataset_path)
+            is_dataset_empty = self.image_matcher.is_dataset_empty(dataset)
 
-            if self.image_matcher.is_dataset_empty(dataset) == False:
-                for image in item_images:
-                    # Download and open image
-                    img = Image.open(get_image_from_url(image))
+            for image in item_images:
+                # Download image and extract it's features
+                image_features = self.image_matcher.extract(
+                    img=Image.open(get_image_from_url(image)))
+
+                # Append features to dataset array
+                dataset[0].append(image_features)
+                # Append Image to images array
+                dataset[1].append(image)
+                if is_dataset_empty == False:
                     # Calculate image match percatage
                     image_matches = self.image_matcher.calculate_matches(
-                        dataset, img)
+                        dataset, image_features)
                     match_images_results.append(image_matches)
 
+            # Write/Append new feature to dataset flie
+            self.image_matcher.save_dataset(
+                dataset, dataset_path)
+
         matches = []
-        # Compare dataset with query features
         for other_item in other_items:
             # Find best 2 images matches
             images_match_score = self.image_matcher.find_images_best_matches(
@@ -166,50 +177,24 @@ class someClass():
                 # TODO: see if passing request + offer id would be enough instand of all object
         return matches
 
-    def search_match_for_offer(self, offer):
-        # TODO: select filter by request price as well
-        # Select requests according to request info
-        requests = self.database.executeQuery(Queries.getRequests(
-            category_id=offer.category, subcategory_id=offer.subcategory))
-        requests = map(lambda item: Request(item), requests)
-
-        match_images_results = []
-        offer_images = offer.images
-        if(len(offer_images) > 0):
-            # Load requests images dataset according to offer's category
-            dataset_path = os.path.join(self.requests_directory, self.get_filename_from_category(
-                offer.category, offer.subcategory))
-            dataset = self.image_matcher.load_dataset(dataset_path)
-
-            if self.image_matcher.is_dataset_empty(dataset) == False:
-                for image in offer_images:
-                    # Download and open image
-                    img = Image.open(get_image_from_url(image))
-                    # Calculate image match percatage
-                    image_matches = self.image_matcher.calculate_matches(
-                        dataset, img)
-                    match_images_results.append(image_matches)
-
-        matches = []
-        # Compare dataset with query features
-        for request in requests:
-            # Find best 2 images matches
-            images_match_score = self.image_matcher.find_images_best_matches(
-                request.images, match_images_results)
-            match = Match(request, offer, images_match_score)
-            if(match.matchPercantage >= MIN_MATCH_RATE):
-                matches.append(match)
-                # TODO: see if passing request + offer id would be enough instand of all object
-        return matches
-
     def find_or_create_category_dataset(self,  categories_dataset, category, subcategory):
         category_dataset = categories_dataset.readItem(
             category, subcategory)
         if category_dataset is None:
-            category_dataset = ([], [])  # New empty category dataset
+            # New empty category dataset
+            category_dataset = ([], [])
             categories_dataset.newItem(
                 category_dataset, category, subcategory)
         return category_dataset
+
+    def dataset_append(self, dataset, feature, img_path):
+        # Append images features to exsiting features numpy array
+        features = np.append(
+            dataset[0], feature)
+        # Append Image to images array
+        dataset[1].append(img_path)
+
+        return (features, dataset[1])
 
     @staticmethod
     def get_filename_from_category(category_id, subcategory_id):
