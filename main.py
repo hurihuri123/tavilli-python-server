@@ -1,7 +1,7 @@
 from utilities.mySql import MySqlConnector
 from utilities.multiKeysDict import MultiKeysDict
 from utilities.queries import Queries, OFFERS_TABLE, REQUESTS_TABLE, MATCH_FIELDS, CATEGORY_FIELD, SUBCATEGORY_FIELD, Offer, Request, REQUEST_OBJECT_NAME, OFFER_OBJECT_NAME
-from utilities.utilities import get_image_from_url, list_to_nparray
+from utilities.utilities import get_image_from_url
 from utilities.configParser import ConfigParser
 
 from config.config import DATABASE_HOST, DATABASE_USERNAME, DATEBASE_PASSWORD, DATABASE_NAME
@@ -67,7 +67,7 @@ class someClass():
 
         """
         1.Select new requests (that probably posted while service was off)
-        2.Extract new requests features and save to dataset        
+        2.Extract new requests features and save to dataset
         Args:
         Returns:
             List with new requests objects
@@ -139,6 +139,7 @@ class someClass():
                 item.category, item.subcategory))
             dataset = self.image_matcher.load_dataset(dataset_path)
             is_dataset_empty = self.image_matcher.is_dataset_empty(dataset)
+            new_features_dataset = ([], [])
 
             for image in item_images:
                 # Download image and extract it's features
@@ -146,18 +147,19 @@ class someClass():
                     img=Image.open(get_image_from_url(image)))
 
                 # Append features to dataset array
-                dataset[0].append(image_features)
+                new_features_dataset[0].append(image_features)
                 # Append Image to images array
-                dataset[1].append(image)
+                new_features_dataset[1].append(image)
+
                 if is_dataset_empty == False:
                     # Calculate image match percatage
                     image_matches = self.image_matcher.calculate_matches(
                         dataset, image_features)
                     match_images_results.append(image_matches)
 
-            # Write/Append new feature to dataset flie
+            # Append new feature to dataset flie
             self.image_matcher.save_dataset(
-                dataset, dataset_path)
+                new_features_dataset, dataset_path)
 
         matches = []
         for other_item in other_items:
@@ -196,11 +198,11 @@ class someClass():
 
         return (features, dataset[1])
 
-    @staticmethod
+    @ staticmethod
     def get_filename_from_category(category_id, subcategory_id):
         return "{}_{}.{}".format(category_id, subcategory_id, DATASET_FILE_EXTENTION)
 
-    @staticmethod
+    @ staticmethod
     def get_category_from_filename(filename):
         splited = filename.split("_")
         if len(splited) >= 2:

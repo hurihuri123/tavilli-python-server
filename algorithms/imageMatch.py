@@ -7,7 +7,6 @@ from PIL import Image
 from imutils.paths import list_images
 import ntpath
 from pathlib import Path
-from utilities.utilities import list_to_nparray
 import hickle as hkl
 
 import cv2  # Temporary import (just for show)
