@@ -147,6 +147,8 @@ class ImageMatch(FeatureExtractor):
                 elif score < lowest_distance:
                     lowest_distance = score
             except:
+                # TODO critical log error should alert us and save somewhere
+                print("Critical Error - image name doesn't exists in matching result")
                 pass
         return lowest_distance
 
