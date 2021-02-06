@@ -21,6 +21,7 @@ from pathlib import Path
 DATASET_FILE_EXTENTION = "hkl"
 
 CONFIG_LAST_REQUEST_ID_KEY = "lastRequestId"
+CONFIG_LAST_OFFER_ID_KEY = "lastOfferId"
 MIN_MATCH_RATE = 0
 
 
@@ -50,6 +51,15 @@ class someClass():
         # TODO: search for duplications
         for match in matches:
             print(match)
+
+        """
+        1.Select new requests (that probably posted while service was off)
+        2.Extract new requests features and save to dataset
+        3.Search for matching offers
+        Args:
+        Returns:
+            List with new requests objects
+        """
 
     def init_dataset_requests(self):
         new_requests = []
@@ -102,6 +112,19 @@ class someClass():
 
         return new_requests
 
+        """
+        1.Select all offers
+        2.Load all existing offers dataset
+        3.Append each new offer's images to appropriate dataset according to category + subcategory
+        4.Search for matching requets
+        We indicate new offer by 2 ways:
+            1.It's images doesn't existing in out storage (could happen if server was off or "auto submit" changed)
+            2.It's id is bigger than last id stored at config file
+        Args:
+        Returns:
+            List with new offers objects
+        """
+
     def init_dataset_offers(self):
         new_offers = []
         # Get all offers
@@ -120,7 +143,7 @@ class someClass():
             categories_dataset.newItem(
                 (features, imgs_path), category, subcategory)
 
-        # Iterate on offers and append missing features
+        # Mark new offers and append missing features
         modified_categories_ids = MultiKeysDict()
         for offer in offers:
             # Find dataset by category
