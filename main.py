@@ -52,34 +52,43 @@ class someClass():
         for match in matches:
             print(match)
 
+    def init_dataset_requests(self):
+        return self.init_dataset(config_last_item_key=CONFIG_LAST_REQUEST_ID_KEY,
+                                 select_items_callback=Queries.getRequests,
+                                 item_type=Request, items_directory_path=self.requests_directory)
+
+    def init_dataset_offers(self):
+        return self.init_dataset(config_last_item_key=CONFIG_LAST_OFFER_ID_KEY,
+                                 select_items_callback=Queries.getOffers,
+                                 item_type=Offer, items_directory_path=self.offers_directory)
+
         """
         1.Select new requests (that probably posted while service was off)
-        2.Extract new requests features and save to dataset
-        3.Search for matching offers
+        2.Extract new requests features and save to dataset        
         Args:
         Returns:
             List with new requests objects
         """
 
-    def init_dataset_requests(self):
-        new_requests = []
+    def init_dataset(self, config_last_item_key, select_items_callback, item_type, items_directory_path):
+        new_items = []
         categories_dataset = MultiKeysDict()
         categories_with_images_ids = MultiKeysDict()
 
-        last_handled_request_id = self.config_parser.read_config_value(
-            CONFIG_LAST_REQUEST_ID_KEY)
-        # Get new requests
-        requests = self.database.executeQuery(
-            Queries.getRequests(start_id=last_handled_request_id))
+        last_handled_item_id = self.config_parser.read_config_value(
+            config_last_item_key)
+        # Select new items
+        items = self.database.executeQuery(
+            select_items_callback(start_id=last_handled_item_id))
         # Map each json to request object
-        requests = map(lambda item: Request(item), requests)
+        items = map(lambda item: item_type(item), items)
         # Map each new request to dataset object
-        for request in requests:
+        for item in items:
             # Find dataset by category
             category_dataset = self.find_or_create_category_dataset(
-                categories_dataset, request.category, request.subcategory)
+                categories_dataset, item.category, item.subcategory)
 
-            for image in request.images:
+            for image in item.images:
                 # Download image and extract it's features
                 image_features = self.image_matcher.extract(
                     img=Image.open(get_image_from_url(image)))
@@ -89,9 +98,9 @@ class someClass():
                 category_dataset[1].append(image)
                 # Mark that category has image
                 categories_with_images_ids.newItem(
-                    True, request.category, request.subcategory)
+                    True, item.category, item.subcategory)
 
-            new_requests.append(request)
+            new_items.append(item)
 
         # Save new request's features to dataset files
         for category, subcategories in categories_with_images_ids.items():
@@ -102,86 +111,15 @@ class someClass():
                     category, subcategory)
                 # Write/Append new feature to dataset flie
                 self.image_matcher.save_dataset(
-                    category_dataset, os.path.join(self.requests_directory, filename), 'a')
+                    category_dataset, os.path.join(items_directory_path, filename), 'a')
 
-        if len(new_requests) > 0:
+        if len(new_items) > 0:
             # Get highest request id (requests are ordered by ascending ID)
-            last_request = new_requests[-1]
+            last_item = new_items[-1]
             self.config_parser.write_config_value(
-                CONFIG_LAST_REQUEST_ID_KEY, last_request.id)
+                config_last_item_key, last_item.id)
 
-        return new_requests
-
-        """
-        1.Select all offers
-        2.Load all existing offers dataset
-        3.Append each new offer's images to appropriate dataset according to category + subcategory
-        4.Search for matching requets
-        We indicate new offer by 2 ways:
-            1.It's images doesn't existing in out storage (could happen if server was off or "auto submit" changed)
-            2.It's id is bigger than last id stored at config file
-        Args:
-        Returns:
-            List with new offers objects
-        """
-
-    def init_dataset_offers(self):
-        new_offers = []
-
-        last_handled_offer_id = self.config_parser.read_config_value(
-            CONFIG_LAST_OFFER_ID_KEY)
-        # Get all offers
-        offers = self.database.executeQuery(
-            Queries.getOffers(start_id=last_handled_offer_id))
-        # Map each json to offer object
-        offers = map(lambda item: Offer(item), offers)
-
-        # Read all existing offers datasets features
-        categories_dataset = MultiKeysDict()
-        for dataset_file in Path(self.offers_directory).glob("*.{}".format(DATASET_FILE_EXTENTION)):
-            (features, imgs_path) = self.image_matcher.load_dataset(dataset_file)
-            category, subcategory = self.get_category_from_filename(
-                dataset_file.stem)
-
-            categories_dataset.newItem(
-                (features, imgs_path), category, subcategory)
-
-        # Mark new offers and append missing features
-        modified_categories_ids = MultiKeysDict()
-        for offer in offers:
-            # Find dataset by category
-            category_dataset = self.find_or_create_category_dataset(
-                categories_dataset, offer.category, offer.subcategory)
-
-            # Search for new images that aren't in dataset
-            for image in offer.images:
-                found = self.image_matcher.find_feature_by_image_path(
-                    category_dataset, image)
-                if found is None:
-                    # Download image and extract it's features
-                    image_features = self.image_matcher.extract(
-                        img=Image.open(get_image_from_url(image)))
-                    # Append features to dataset
-                    category_dataset[0].append(image_features)
-                    # Append Image to images array
-                    category_dataset[1].append(image)
-                    # Mark dataset as modified
-                    modified_categories_ids.newItem(
-                        True, offer.category, offer.subcategory)
-            new_offers.append(offer)
-
-        # Save updated datasets to file
-        for category, subcategories in modified_categories_ids.items():
-            for subcategory in subcategories:
-                category_dataset = categories_dataset.readItem(
-                    category, subcategory)
-
-                filename = self.get_filename_from_category(
-                    category, subcategory)
-                self.image_matcher.save_dataset(
-                    category_dataset, os.path.join(self.offers_directory, filename))
-
-        return new_offers
+        return new_items
 
     def search_match_for_request(self, request):
         # TODO: select filter by request price as well
