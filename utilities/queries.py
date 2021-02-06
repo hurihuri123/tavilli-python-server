@@ -14,7 +14,10 @@ ID_FIELD = "id"
 CATEGORY_FIELD = "category"
 SUBCATEGORY_FIELD = "subCategory"
 AUTO_SUBMIT_FIELD = "autoSubmit"
+STATUS_FIELD = "status"
 
+# Static values
+OPEN_STATUS = 1
 
 MATCH_FIELDS = "{},ownerId,{},{},{},{},{},{}".format(
     DESCRIPTION_FIELD, IMAGES_FIELD, TITLE_FIELD, PRICE_FIELD, ID_FIELD, CATEGORY_FIELD, SUBCATEGORY_FIELD)
@@ -22,7 +25,7 @@ MATCH_FIELDS = "{},ownerId,{},{},{},{},{},{}".format(
 
 class Queries():
     @staticmethod
-    def getOffers(category_id=None, subcategory_id=None, required_images=False, auto_submit=True):
+    def getOffers(category_id=None, subcategory_id=None, required_images=False, auto_submit=True, status=OPEN_STATUS):
         query_extra_filters = ""
 
         # Set optional query filter fields
@@ -34,12 +37,12 @@ class Queries():
             query_extra_filters += "AND {images} != ''".format(
                 images=IMAGES_FIELD)
 
-        return "SELECT {matchFields} FROM {table} WHERE {autoSubmit} = {autoSubmitValue} {extraFilters}".format(
-            matchFields=MATCH_FIELDS, table=OFFERS_TABLE, autoSubmit=AUTO_SUBMIT_FIELD,
+        return "SELECT {matchFields} FROM {table} WHERE {statusField} = {statusValue} AND {autoSubmit} = {autoSubmitValue} {extraFilters}".format(
+            matchFields=MATCH_FIELDS, table=OFFERS_TABLE, statusField=STATUS_FIELD, statusValue=status, autoSubmit=AUTO_SUBMIT_FIELD,
             autoSubmitValue=auto_submit, extraFilters=query_extra_filters)
 
     @staticmethod
-    def getRequests(start_id=None, category_id=None, subcategory_id=None):
+    def getRequests(start_id=None, category_id=None, subcategory_id=None, status=OPEN_STATUS):
         where_string = ""
         query_orderby = ""
         query_extra_filters = where_string
@@ -52,12 +55,9 @@ class Queries():
                 category=CATEGORY_FIELD,
                 categoryValue=category_id, subcategory=SUBCATEGORY_FIELD, subcategoryValue=subcategory_id)
 
-        if query_extra_filters != "":
-            query_extra_filters = "WHERE {}".format(
-                query_extra_filters.replace("AND", "", 1))  # Remove first "AND" operator
-
-        return "SELECT {matchFields} FROM {table} {extraFilters} {orderBy}".format(matchFields=MATCH_FIELDS,
-                                                                                   table=REQUESTS_TABLE, extraFilters=query_extra_filters, orderBy=query_orderby)
+        return "SELECT {matchFields} FROM {table} WHERE  {statusField} = {statusValue} {extraFilters} {orderBy}".format(
+            matchFields=MATCH_FIELDS, table=REQUESTS_TABLE, extraFilters=query_extra_filters, orderBy=query_orderby,
+            statusField=STATUS_FIELD, statusValue=status)
 
 
 class Offer(object):
