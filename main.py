@@ -18,12 +18,16 @@ import os
 from pathlib import Path
 import numpy as np
 
+
 # TODO: doc and change name
 DATASET_FILE_EXTENTION = "hkl"
 
 CONFIG_LAST_REQUEST_ID_KEY = "lastRequestId"
 CONFIG_LAST_OFFER_ID_KEY = "lastOfferId"
 MIN_MATCH_RATE = 0
+
+DATASET_FEATURES_INDEX = 0
+DATASET_IMAGE_NAME_INDEX = 1
 
 
 class someClass():
@@ -96,9 +100,9 @@ class someClass():
                 image_features = self.image_matcher.extract(
                     img=Image.open(get_image_from_url(image)))
                 # Append features to dataset array
-                category_dataset[0].append(image_features)
+                category_dataset[DATASET_FEATURES_INDEX].append(image_features)
                 # Append Image to images array
-                category_dataset[1].append(image)
+                category_dataset[DATASET_IMAGE_NAME_INDEX].append(image)
                 # Mark that category has image
                 categories_with_images_ids.newItem(
                     True, item.category, item.subcategory)
@@ -142,14 +146,18 @@ class someClass():
             new_features_dataset = ([], [])
 
             for image in item_images:
-                # Download image and extract it's features
-                image_features = self.image_matcher.extract(
-                    img=Image.open(get_image_from_url(image)))
-
-                # Append features to dataset array
-                new_features_dataset[0].append(image_features)
-                # Append Image to images array
-                new_features_dataset[1].append(image)
+                image_features = self.image_matcher.find_feature_by_image_path(
+                    dataset, image)
+                if image_features is None:
+                    # Download image and extract it's features
+                    image_features = self.image_matcher.extract(
+                        img=Image.open(get_image_from_url(image)))
+                    # Append features to new dataset array
+                    new_features_dataset[DATASET_FEATURES_INDEX].append(
+                        image_features)
+                    # Append Image to images array
+                    new_features_dataset[DATASET_IMAGE_NAME_INDEX].append(
+                        image)
 
                 if is_dataset_empty == False:
                     # Calculate image match percatage
@@ -158,14 +166,15 @@ class someClass():
                     match_images_results.append(image_matches)
 
             # Append new feature to dataset flie
-            self.image_matcher.save_dataset(
-                new_features_dataset, dataset_path)
+            if self.image_matcher.is_dataset_empty(new_features_dataset) == False:
+                self.image_matcher.save_dataset(
+                    new_features_dataset, dataset_path)
 
         matches = []
         for other_item in other_items:
             # Find best 2 images matches
             images_match_score = self.image_matcher.find_images_best_matches(
-                item.images, match_images_results)
+                other_item.images, match_images_results)
 
             if item.__str__() == REQUEST_OBJECT_NAME:
                 match = Match(request=item, offer=other_item,
@@ -188,15 +197,6 @@ class someClass():
             categories_dataset.newItem(
                 category_dataset, category, subcategory)
         return category_dataset
-
-    def dataset_append(self, dataset, feature, img_path):
-        # Append images features to exsiting features numpy array
-        features = np.append(
-            dataset[0], feature)
-        # Append Image to images array
-        dataset[1].append(img_path)
-
-        return (features, dataset[1])
 
     @ staticmethod
     def get_filename_from_category(category_id, subcategory_id):
