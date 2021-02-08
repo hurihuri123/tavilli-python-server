@@ -17,6 +17,7 @@ from PIL import Image
 import os
 from pathlib import Path
 import numpy as np
+import json
 
 
 # TODO: doc and change name
@@ -52,9 +53,9 @@ class someClass():
         for offer in new_offers:
             matches = matches + self.search_matches(item=offer, other_item_type=Request,
                                                     select_other_items_callback=Queries.getRequests, other_items_dir=self.requests_directory, same_items_dir=self.offers_directory)
-        # TODO: search for duplications
-        for match in matches:
-            print(match)
+        # Convert each result dict to json string (in order to have a unqiue key for "set" function) and remove duplications
+        set_map_results = set(
+            map(lambda match: json.dumps(match.__str__()), matches))
 
     def init_dataset_requests(self):
         return self.init_dataset(config_last_item_key=CONFIG_LAST_REQUEST_ID_KEY,
