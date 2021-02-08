@@ -134,15 +134,15 @@ class someClass():
 
     def search_matches(self, item, other_item_type, select_other_items_callback, other_items_dir):
         # TODO: select filter by item price as well
-        other_items = self.database.executeQuery(select_other_items_callback(
+        compare_items = self.database.executeQuery(select_other_items_callback(
             category_id=item.category, subcategory_id=item.subcategory))
-        other_items = map(lambda other_item: other_item_type(
-            other_item), other_items)
+        compare_items = map(lambda compare_item: other_item_type(
+            compare_item), compare_items)
 
         match_images_results = []
         item_images = item.images
         if(len(item_images) > 0):
-            # Load  images dataset according to item category
+            # Load  other item's images dataset according to item category
             dataset_path = os.path.join(other_items_dir, self.get_filename_from_category(
                 item.category, item.subcategory))
             dataset = self.image_matcher.load_dataset(dataset_path)
@@ -174,17 +174,17 @@ class someClass():
                 dataset, dataset_path)
 
         matches = []
-        for other_item in other_items:
+        for compare_item in compare_items:
             # Find best 2 images matches
             images_match_score = self.image_matcher.find_images_best_matches(
-                other_item.images, match_images_results)
+                compare_item.images, match_images_results)
 
             if item.__str__() == REQUEST_OBJECT_NAME:
-                match = Match(request=item, offer=other_item,
+                match = Match(request=item, offer=compare_item,
                               images_distance=images_match_score)
             else:
                 match = Match(
-                    request=other_item, offer=item, images_distance=images_match_score)
+                    request=compare_item, offer=item, images_distance=images_match_score)
 
             if(match.matchPercantage >= MIN_MATCH_RATE):
                 matches.append(match)
