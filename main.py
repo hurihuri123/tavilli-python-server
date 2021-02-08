@@ -112,14 +112,15 @@ class someClass():
                     category, subcategory)
                 filename = self.get_filename_from_category(
                     category, subcategory)
+                dataset_path = os.path.join(items_directory_path, filename)
                 # Load existing stored dataset
-                dataset = self.image_matcher.load_dataset(filename)
+                dataset = self.image_matcher.load_dataset(dataset_path)
                 # Append new features to dataset dict
                 dataset = self.image_matcher.merge_datasets(
                     dataset1=dataset, dataset2=category_dataset)
                 # Save changes to file
                 self.image_matcher.save_dataset(
-                    dataset, os.path.join(items_directory_path, filename))
+                    dataset, dataset_path)
 
         if len(new_items) > 0:
             # Get highest request id (requests are ordered by ascending ID)
