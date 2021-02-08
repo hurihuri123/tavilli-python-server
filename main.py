@@ -96,12 +96,9 @@ class someClass():
                 # Download image and extract it's features
                 image_features = self.image_matcher.extract(
                     img=Image.open(get_image_from_url(image)))
-                # Append new item to dataset
-                updated_dataset = self.image_matcher.merge_datasets(
-                    category_dataset, (image_features, [image]))
-                # Set dataset in dict
-                categories_dataset.newItem(
-                    updated_dataset, item.category, item.subcategory)
+
+                self.image_matcher.add_item_to_dataset(
+                    category_dataset, image_features, image)
                 # Mark that category has image
                 categories_with_images_ids.newItem(
                     True, item.category, item.subcategory)
@@ -165,8 +162,8 @@ class someClass():
                     image_features = self.image_matcher.extract(
                         img=Image.open(get_image_from_url(image)))
                     # Append new item to dataset
-                    new_features_dataset = self.image_matcher.merge_datasets(
-                        new_features_dataset, (image_features, [image]))
+                    self.image_matcher.add_item_to_dataset(
+                        new_features_dataset, image_features, image)
 
                 if is_dataset_empty == False:
                     # Calculate image match percatage

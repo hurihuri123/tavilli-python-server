@@ -86,13 +86,17 @@ class ImageMatch(FeatureExtractor):
         return dataset
 
     def new_dataset(self):
-        return (np.array([]), [])
+        return ([], [])
+
+    def add_item_to_dataset(self, dataset, feature, img_path):
+        dataset[DATASET_FEATURES_INDEX].append(feature)
+        dataset[DATASET_IMAGE_NAME_INDEX].append(img_path)
 
     def merge_datasets(self, dataset1, dataset2):
         (features1, img_paths1) = dataset1
         (features2, img_paths2) = dataset2
 
-        new_features = np.concatenate((features1, features2))
+        new_features = features1 + features2
         new_img_paths = img_paths1 + img_paths2
 
         return (new_features, new_img_paths)
@@ -122,7 +126,6 @@ class ImageMatch(FeatureExtractor):
         for key, value in dataset_dict.items():
             features.append(value)
             img_paths.append(key)
-        features = np.array(features)
         return (features, img_paths)
 
     def find_feature_by_image_path(self, dataset_tuple, image_path, start_index=0):
@@ -136,8 +139,6 @@ class ImageMatch(FeatureExtractor):
         finally:
             return feature
 
-    # TODO pass Image opened object instand of path
-    #
         """
         
         Args:
@@ -150,6 +151,7 @@ class ImageMatch(FeatureExtractor):
     def calculate_matches(self, dataset, query_features):
         scores = {}
         features, img_paths = dataset
+        features = np.array(features)
         # L2 distances to features
         dists = np.linalg.norm(features-query_features, axis=1)
         for index, score in enumerate(dists):
