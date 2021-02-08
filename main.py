@@ -97,8 +97,11 @@ class someClass():
                 image_features = self.image_matcher.extract(
                     img=Image.open(get_image_from_url(image)))
                 # Append new item to dataset
-                category_dataset = self.image_matcher.merge_datasets(
-                    category_dataset, (image_features, image))
+                updated_dataset = self.image_matcher.merge_datasets(
+                    category_dataset, (image_features, [image]))
+                # Set dataset in dict
+                categories_dataset.newItem(
+                    updated_dataset, item.category, item.subcategory)
                 # Mark that category has image
                 categories_with_images_ids.newItem(
                     True, item.category, item.subcategory)
@@ -132,7 +135,7 @@ class someClass():
     def search_matches(self, item, other_item_type, select_other_items_callback, other_items_dir):
         # TODO: select filter by item price as well
         other_items = self.database.executeQuery(select_other_items_callback(
-            item.category, item.subcategory))
+            category_id=item.category, subcategory_id=item.subcategory))
         other_items = map(lambda other_item: other_item_type(
             other_item), other_items)
 
@@ -153,8 +156,9 @@ class someClass():
                     # Download image and extract it's features
                     image_features = self.image_matcher.extract(
                         img=Image.open(get_image_from_url(image)))
+                    # Append new item to dataset
                     new_features_dataset = self.image_matcher.merge_datasets(
-                        new_features_dataset, (image_features, image))
+                        new_features_dataset, (image_features, [image]))
 
                 if is_dataset_empty == False:
                     # Calculate image match percatage
