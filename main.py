@@ -145,33 +145,34 @@ class someClass():
             # Load  other item's images dataset according to item category
             dataset_path = os.path.join(other_items_dir, self.get_filename_from_category(
                 item.category, item.subcategory))
-            dataset = self.image_matcher.load_dataset(dataset_path)
-            is_dataset_empty = self.image_matcher.is_dataset_empty(dataset)
+            compare_dataset = self.image_matcher.load_dataset(dataset_path)
+            is_dataset_empty = self.image_matcher.is_dataset_empty(
+                compare_dataset)
             new_features_dataset = self.image_matcher.new_dataset()
 
             for image in item_images:
                 image_features = self.image_matcher.find_feature_by_image_path(
-                    dataset, image)
+                    compare_dataset, image)
                 if image_features is None:
                     # Download image and extract it's features
                     image_features = self.image_matcher.extract(
                         img=Image.open(get_image_from_url(image)))
-                    # Append new item to dataset
+                    # Append new item to compare_dataset
                     new_features_dataset = self.image_matcher.merge_datasets(
                         new_features_dataset, (image_features, [image]))
 
                 if is_dataset_empty == False:
                     # Calculate image match percatage
                     image_matches = self.image_matcher.calculate_matches(
-                        dataset, image_features)
+                        compare_dataset, image_features)
                     match_images_results.append(image_matches)
 
-            # Append new features to dataset dict
-            dataset = self.image_matcher.merge_datasets(
-                dataset1=dataset, dataset2=new_features_dataset)
+            # Append new features to compare_dataset dict
+            compare_dataset = self.image_matcher.merge_datasets(
+                dataset1=compare_dataset, dataset2=new_features_dataset)
             # Save changes to file
             self.image_matcher.save_dataset(
-                dataset, dataset_path)
+                compare_dataset, dataset_path)
 
         matches = []
         for compare_item in compare_items:
