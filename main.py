@@ -26,9 +26,6 @@ CONFIG_LAST_REQUEST_ID_KEY = "lastRequestId"
 CONFIG_LAST_OFFER_ID_KEY = "lastOfferId"
 MIN_MATCH_RATE = 0
 
-DATASET_FEATURES_INDEX = 0
-DATASET_IMAGE_NAME_INDEX = 1
-
 
 class someClass():
     def __init__(self):
@@ -99,10 +96,9 @@ class someClass():
                 # Download image and extract it's features
                 image_features = self.image_matcher.extract(
                     img=Image.open(get_image_from_url(image)))
-                # Append features to dataset array
-                category_dataset[DATASET_FEATURES_INDEX].append(image_features)
-                # Append Image to images array
-                category_dataset[DATASET_IMAGE_NAME_INDEX].append(image)
+                # Append new item to dataset
+                category_dataset = self.image_matcher.merge_datasets(
+                    category_dataset, (image_features, image))
                 # Mark that category has image
                 categories_with_images_ids.newItem(
                     True, item.category, item.subcategory)
@@ -116,9 +112,14 @@ class someClass():
                     category, subcategory)
                 filename = self.get_filename_from_category(
                     category, subcategory)
-                # Write/Append new feature to dataset flie
+                # Load existing stored dataset
+                dataset = self.image_matcher.load_dataset(filename)
+                # Append new features to dataset dict
+                dataset = self.image_matcher.merge_datasets(
+                    dataset1=dataset, dataset2=category_dataset)
+                # Save changes to file
                 self.image_matcher.save_dataset(
-                    category_dataset, os.path.join(items_directory_path, filename))
+                    dataset, os.path.join(items_directory_path, filename))
 
         if len(new_items) > 0:
             # Get highest request id (requests are ordered by ascending ID)
@@ -143,7 +144,7 @@ class someClass():
                 item.category, item.subcategory))
             dataset = self.image_matcher.load_dataset(dataset_path)
             is_dataset_empty = self.image_matcher.is_dataset_empty(dataset)
-            new_features_dataset = ([], [])
+            new_features_dataset = self.image_matcher.new_dataset()
 
             for image in item_images:
                 image_features = self.image_matcher.find_feature_by_image_path(
@@ -152,12 +153,8 @@ class someClass():
                     # Download image and extract it's features
                     image_features = self.image_matcher.extract(
                         img=Image.open(get_image_from_url(image)))
-                    # Append features to new dataset array
-                    new_features_dataset[DATASET_FEATURES_INDEX].append(
-                        image_features)
-                    # Append Image to images array
-                    new_features_dataset[DATASET_IMAGE_NAME_INDEX].append(
-                        image)
+                    new_features_dataset = self.image_matcher.merge_datasets(
+                        new_features_dataset, (image_features, image))
 
                 if is_dataset_empty == False:
                     # Calculate image match percatage
@@ -165,10 +162,12 @@ class someClass():
                         dataset, image_features)
                     match_images_results.append(image_matches)
 
-            # Append new feature to dataset flie
-            if self.image_matcher.is_dataset_empty(new_features_dataset) == False:
-                self.image_matcher.save_dataset(
-                    new_features_dataset, dataset_path)
+            # Append new features to dataset dict
+            dataset = self.image_matcher.merge_datasets(
+                dataset1=dataset, dataset2=new_features_dataset)
+            # Save changes to file
+            self.image_matcher.save_dataset(
+                dataset, dataset_path)
 
         matches = []
         for other_item in other_items:
@@ -193,7 +192,7 @@ class someClass():
             category, subcategory)
         if category_dataset is None:
             # New empty category dataset
-            category_dataset = ([], [])
+            category_dataset = self.image_matcher.new_dataset()
             categories_dataset.newItem(
                 category_dataset, category, subcategory)
         return category_dataset

@@ -11,6 +11,9 @@ import hickle as hkl
 
 import cv2  # Temporary import (just for show)
 
+DATASET_FEATURES_INDEX = 0
+DATASET_IMAGE_NAME_INDEX = 1
+
 
 class FeatureExtractor:
     def __init__(self):
@@ -63,7 +66,12 @@ class ImageMatch(FeatureExtractor):
     def __init__(self):
         super().__init__()
 
-    def save_dataset(self, dataset, dataset_path, command_mode='a'):
+    # TODO: create dataset class
+
+    # Appending isn't an open becuase we uses a dict in order to load all objects at once
+    def save_dataset(self, dataset, dataset_path, command_mode='w'):
+        print("printing dataset save")
+        self.print_dataset(dataset)
         dataset_dict = self.convert_dataset_to_dict(dataset)
         hkl.dump(dataset_dict, dataset_path, command_mode)
 
@@ -72,7 +80,27 @@ class ImageMatch(FeatureExtractor):
             dataset_dict = hkl.load(dataset_path)
         else:
             dataset_dict = {}
-        return self.convert_dict_to_dataset(dataset_dict)
+        dataset = self.convert_dict_to_dataset(dataset_dict)
+        print("printing dataset load")
+        self.print_dataset(dataset)
+        return dataset
+
+    def new_dataset(self):
+        return (np.array([]), [])
+
+    def merge_datasets(self, dataset1, dataset2):
+        (features1, img_paths1) = dataset1
+        (features2, img_paths2) = dataset2
+
+        new_features = np.concatenate((features1, features2))
+        new_img_paths = img_paths1 + img_paths2
+
+        return (new_features, new_img_paths)
+
+    def print_dataset(self, dataset):
+        (features, img_paths) = dataset
+        for img_path in img_paths:
+            print(img_path)
 
     def is_dataset_empty(self, dataset):
         if not dataset:
