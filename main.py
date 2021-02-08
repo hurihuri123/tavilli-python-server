@@ -186,16 +186,17 @@ class someClass():
             images_match_score = self.image_matcher.find_images_best_matches(
                 compare_item.images, match_images_results)
 
-            if item.__str__() == REQUEST_OBJECT_NAME:
+            if(compare_item.ownerId == item.ownerId):
+                match = None  # Don't match 2 products owned by the same user
+            elif item.__str__() == REQUEST_OBJECT_NAME:
                 match = Match(request=item, offer=compare_item,
                               images_distance=images_match_score)
             else:
                 match = Match(
                     request=compare_item, offer=item, images_distance=images_match_score)
 
-            if(match.matchPercantage >= MIN_MATCH_RATE):
+            if(match is not None and match.matchPercantage >= MIN_MATCH_RATE):
                 matches.append(match)
-                # TODO: see if passing request + offer id would be enough instand of all object
         return matches
 
     def find_or_create_category_dataset(self,  categories_dataset, category, subcategory):

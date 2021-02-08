@@ -6,6 +6,7 @@ OFFERS_TABLE = "offers"
 REQUESTS_TABLE = "requests"
 
 # Fields
+OWNER_ID_FIELD = "ownerId"
 DESCRIPTION_FIELD = "description"
 IMAGES_FIELD = "images"
 TITLE_FIELD = "title"
@@ -21,8 +22,8 @@ OPEN_STATUS = 1
 REQUEST_OBJECT_NAME = "request"
 OFFER_OBJECT_NAME = "offer"
 
-MATCH_FIELDS = "{},ownerId,{},{},{},{},{},{}".format(
-    DESCRIPTION_FIELD, IMAGES_FIELD, TITLE_FIELD, PRICE_FIELD, ID_FIELD, CATEGORY_FIELD, SUBCATEGORY_FIELD)
+MATCH_FIELDS = "{},{},{},{},{},{},{},{}".format(
+    DESCRIPTION_FIELD, OWNER_ID_FIELD, IMAGES_FIELD, TITLE_FIELD, PRICE_FIELD, ID_FIELD, CATEGORY_FIELD, SUBCATEGORY_FIELD)
 
 
 class Queries():
@@ -76,6 +77,10 @@ class Offer(object):
         return int(self.offer[ID_FIELD])
 
     @property
+    def ownerId(self):
+        return int(self.offer[OWNER_ID_FIELD])
+
+    @property
     def images(self):
         result = []
         if(self.offer[IMAGES_FIELD] != ""):
@@ -106,6 +111,10 @@ class Request(object):
     @property
     def id(self):
         return int(self.request[ID_FIELD])
+
+    @property
+    def ownerId(self):
+        return int(self.request[OWNER_ID_FIELD])
 
     @property
     def images(self):
