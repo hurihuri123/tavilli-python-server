@@ -48,10 +48,10 @@ class someClass():
         matches = []
         for request in new_requests:
             matches = matches + self.search_matches(item=request, other_item_type=Offer,
-                                                    select_other_items_callback=Queries.getOffers, other_items_dir=self.offers_directory)
+                                                    select_other_items_callback=Queries.getOffers, other_items_dir=self.offers_directory, same_items_dir=self.requests_directory)
         for offer in new_offers:
             matches = matches + self.search_matches(item=offer, other_item_type=Request,
-                                                    select_other_items_callback=Queries.getRequests, other_items_dir=self.requests_directory)
+                                                    select_other_items_callback=Queries.getRequests, other_items_dir=self.requests_directory, same_items_dir=self.offers_directory)
         # TODO: search for duplications
         for match in matches:
             print(match)
@@ -132,7 +132,7 @@ class someClass():
 
         return new_items
 
-    def search_matches(self, item, other_item_type, select_other_items_callback, other_items_dir):
+    def search_matches(self, item, other_item_type, select_other_items_callback, other_items_dir, same_items_dir):
         # TODO: select filter by item price as well
         compare_items = self.database.executeQuery(select_other_items_callback(
             category_id=item.category, subcategory_id=item.subcategory))
@@ -142,22 +142,29 @@ class someClass():
         match_images_results = []
         item_images = item.images
         if(len(item_images) > 0):
-            # Load  other item's images dataset according to item category
-            dataset_path = os.path.join(other_items_dir, self.get_filename_from_category(
+            same_type_dataset_path = os.path.join(same_items_dir, self.get_filename_from_category(
                 item.category, item.subcategory))
-            compare_dataset = self.image_matcher.load_dataset(dataset_path)
+            compare_dataset_path = os.path.join(other_items_dir, self.get_filename_from_category(
+                item.category, item.subcategory))
+
+            same_type_dataset = self.image_matcher.load_dataset(
+                same_type_dataset_path)
+            compare_dataset = self.image_matcher.load_dataset(
+                compare_dataset_path)
+
             is_dataset_empty = self.image_matcher.is_dataset_empty(
                 compare_dataset)
             new_features_dataset = self.image_matcher.new_dataset()
 
             for image in item_images:
                 image_features = self.image_matcher.find_feature_by_image_path(
-                    compare_dataset, image)
+                    same_type_dataset, image)
+
                 if image_features is None:
                     # Download image and extract it's features
                     image_features = self.image_matcher.extract(
                         img=Image.open(get_image_from_url(image)))
-                    # Append new item to compare_dataset
+                    # Append new item to dataset
                     new_features_dataset = self.image_matcher.merge_datasets(
                         new_features_dataset, (image_features, [image]))
 
@@ -167,12 +174,12 @@ class someClass():
                         compare_dataset, image_features)
                     match_images_results.append(image_matches)
 
-            # Append new features to compare_dataset dict
-            compare_dataset = self.image_matcher.merge_datasets(
-                dataset1=compare_dataset, dataset2=new_features_dataset)
+            # Append new features to their dataset
+            updated_dataset = self.image_matcher.merge_datasets(
+                dataset1=same_type_dataset, dataset2=new_features_dataset)
             # Save changes to file
             self.image_matcher.save_dataset(
-                compare_dataset, dataset_path)
+                updated_dataset, same_type_dataset_path)
 
         matches = []
         for compare_item in compare_items:
