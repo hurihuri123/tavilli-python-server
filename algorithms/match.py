@@ -45,4 +45,4 @@ class Match(object):
         return round_float_number(sum)
 
     def __str__(self):
-        return {"requestId": self.request.id, "offerId": self.offer.id, "match": self.matchPercantage}
+        return {"requestId": self.request.id, "offerId": self.offer.id, "percentage": self.matchPercantage}
