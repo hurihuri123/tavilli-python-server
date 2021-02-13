@@ -239,12 +239,27 @@ class MainMatcher():
 
 
 class WebServerHandler(BaseHTTPRequestHandler):
+    matcher = MainMatcher()
+
     def do_POST(self):
         route = self.path
         body = self.parseJsonBody()
+
         if route == "/newRequest":
-            print(body)
-            pass
+            # Extract request id from body
+            request_id = body["requestId"]
+            if request_id is None:
+                # TODO: reposnse with error
+                pass
+            # Select request from DB
+            request = self.matcher.database.executeQuery(
+                Queries.getRequestById(request_id))
+            if request is None:
+                # TODO: reposnse with error
+                pass
+            # Search matches for request
+            matches = self.matcher.search_matches_for_request(request)
+
         elif route == "/newSupplierProduct":
             pass
         else:
@@ -261,4 +276,3 @@ class WebServerHandler(BaseHTTPRequestHandler):
 
 if __name__ == "__main__":
     HttpServer(web_server_handler=WebServerHandler).listen(8000)
-    # main_matcher = MainMatcher()

@@ -66,6 +66,11 @@ class Queries():
             matchFields=MATCH_FIELDS, table=REQUESTS_TABLE, extraFilters=query_extra_filters, orderBy=query_orderby,
             statusField=STATUS_FIELD, statusValue=status)
 
+    @staticmethod
+    def getRequestById(request_id):
+        return "SELECT {matchFields} FROM {table} WHERE {idField} = {idValue}".format(matchFields=MATCH_FIELDS,
+                                                                                      table=REQUESTS_TABLE, idField=ID_FIELD, idValue=request_id)
+
 
 class Offer(object):
     def __init__(self, offer):
