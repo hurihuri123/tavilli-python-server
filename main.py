@@ -7,7 +7,8 @@ from utilities.httpService import HttpService
 
 from config.config import DATABASE_HOST, DATABASE_USERNAME, DATEBASE_PASSWORD, DATABASE_NAME, RETRO_MATCHES_ROUTE, API_HOST
 
-from services.httpServer import HttpServer, WebServerHandler
+from http.server import BaseHTTPRequestHandler, HTTPServer
+from services.httpServer import HttpServer
 
 from algorithms.match import Match
 from algorithms.imageMatch import ImageMatch
@@ -237,6 +238,27 @@ class MainMatcher():
         return (category, subcategory)
 
 
+class WebServerHandler(BaseHTTPRequestHandler):
+    def do_POST(self):
+        route = self.path
+        body = self.parseJsonBody()
+        if route == "/newRequest":
+            print(body)
+            pass
+        elif route == "/newSupplierProduct":
+            pass
+        else:
+            print("Receive new POST with unknown route")
+
+
+# Helpers ---------------------
+
+    def parseJsonBody(self):
+        content_length = int(self.headers['Content-Length'])
+        body = self.rfile.read(content_length).decode('utf-8')
+        return json.loads(body) if body else None
+
+
 if __name__ == "__main__":
     HttpServer(web_server_handler=WebServerHandler).listen(8000)
-    main_matcher = MainMatcher()
+    # main_matcher = MainMatcher()
