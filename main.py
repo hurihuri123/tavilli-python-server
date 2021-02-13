@@ -30,7 +30,7 @@ CONFIG_LAST_OFFER_ID_KEY = "lastOfferId"
 MIN_MATCH_RATE = 0
 
 
-class someClass():
+class MainMatcher():
     def __init__(self):
         super().__init__()
         self.database = MySqlConnector(
@@ -239,4 +239,4 @@ class someClass():
 
 if __name__ == "__main__":
     HttpServer(web_server_handler=WebServerHandler).listen(8000)
-    some_class_object = someClass()
+    main_matcher = MainMatcher()
