@@ -7,6 +7,7 @@ from utilities.httpService import HttpService
 
 from config.config import DATABASE_HOST, DATABASE_USERNAME, DATEBASE_PASSWORD, DATABASE_NAME, RETRO_MATCHES_ROUTE, API_HOST
 
+from services.httpServer import HttpServer, WebServerHandler
 
 from algorithms.match import Match
 from algorithms.imageMatch import ImageMatch
@@ -231,4 +232,5 @@ class someClass():
 
 
 if __name__ == "__main__":
-    some_class_object = someClass()
+    HttpServer(web_server_handler=WebServerHandler).listen(8000)
+    # some_class_object = someClass()

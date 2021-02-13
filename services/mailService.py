@@ -5,7 +5,7 @@ from email.mime.base import MIMEBase
 from email import encoders
 
 
-class Mailer:
+class MailService:
     def __init__(self, sourceMail, sourceMailPassword):
         self.sourceMail = sourceMail
         self.sourceMailPassword = sourceMailPassword
