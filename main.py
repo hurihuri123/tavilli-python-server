@@ -49,16 +49,22 @@ class someClass():
         new_requests = self.init_dataset_requests()
         matches = []
         for request in new_requests:
-            matches = matches + self.search_matches(item=request, other_item_type=Offer,
-                                                    select_other_items_callback=Queries.getOffers, other_items_dir=self.offers_directory, same_items_dir=self.requests_directory)
+            matches = matches + self.search_matches_for_request(request)
         for offer in new_offers:
-            matches = matches + self.search_matches(item=offer, other_item_type=Request,
-                                                    select_other_items_callback=Queries.getRequests, other_items_dir=self.requests_directory, same_items_dir=self.offers_directory)
+            matches = matches + self.search_matches_for_offer(offer)
         # Convert each result dict to json string (in order to have a unqiue key for "set" function) and remove duplications
         matches = set(
             map(lambda match: json.dumps(match.__str__()), matches))
 
         HttpService.post(API_HOST + RETRO_MATCHES_ROUTE, matches)
+
+    def search_matches_for_request(self, request):
+        return self.search_matches(item=request, other_item_type=Offer,
+                                   select_other_items_callback=Queries.getOffers, other_items_dir=self.offers_directory, same_items_dir=self.requests_directory)
+
+    def search_matches_for_offer(self, offer):
+        return self.search_matches(item=offer, other_item_type=Request,
+                                   select_other_items_callback=Queries.getRequests, other_items_dir=self.requests_directory, same_items_dir=self.offers_directory)
 
     def init_dataset_requests(self):
         return self.init_dataset(config_last_item_key=CONFIG_LAST_REQUEST_ID_KEY,
