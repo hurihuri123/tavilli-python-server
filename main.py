@@ -233,4 +233,4 @@ class someClass():
 
 if __name__ == "__main__":
     HttpServer(web_server_handler=WebServerHandler).listen(8000)
-    # some_class_object = someClass()
+    some_class_object = someClass()
