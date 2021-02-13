@@ -58,7 +58,7 @@ class MainMatcher():
         matches = set(
             map(lambda match: json.dumps(match.__str__()), matches))
 
-        HttpService.post(API_HOST + RETRO_MATCHES_ROUTE, matches)
+        # HttpService.post(API_HOST + RETRO_MATCHES_ROUTE, matches)
 
     def search_matches_for_request(self, request):
         return self.search_matches(item=request, other_item_type=Offer,
@@ -249,29 +249,61 @@ class WebServerHandler(BaseHTTPRequestHandler):
             # Extract request id from body
             request_id = body["requestId"]
             if request_id is None:
-                # TODO: reposnse with error
-                pass
+                self.badRequestResponse()
             # Select request from DB
             request = self.matcher.database.executeQuery(
                 Queries.getRequestById(request_id))
             if request is None:
-                # TODO: reposnse with error
-                pass
+                self.notFoundResponse()
             # Search matches for request
-            matches = self.matcher.search_matches_for_request(request)
+            try:
+                matches = self.matcher.search_matches_for_request(request)
+                self.okResponse("hi")
+            except:
+                self.internalErrResponse()
 
         elif route == "/newSupplierProduct":
             pass
         else:
             print("Receive new POST with unknown route")
+            self.notFoundResponse()
 
 
-# Helpers ---------------------
+# ----------- Helpers -----------
+
 
     def parseJsonBody(self):
         content_length = int(self.headers['Content-Length'])
         body = self.rfile.read(content_length).decode('utf-8')
         return json.loads(body) if body else None
+
+    def sendJsonHeaders(self):
+        self.send_header('Content-Type', 'application/json')
+        self.end_headers()
+
+# ----------- Responses -----------
+        """
+        Args:
+            message: stringify message
+        Returns:
+            VOID
+        """
+
+    def okResponse(self, message=None):
+        self.send_response(code=200, message=message)
+        self.sendJsonHeaders()
+
+    def badRequestResponse(self):
+        self.send_response(400)
+        self.sendJsonHeaders()
+
+    def notFoundResponse(self):
+        self.send_response(404)
+        self.sendJsonHeaders()
+
+    def internalErrResponse(self):
+        self.send_response(500)
+        self.sendJsonHeaders()
 
 
 if __name__ == "__main__":
