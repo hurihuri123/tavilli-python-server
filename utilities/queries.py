@@ -122,6 +122,14 @@ class Request(object):
         return int(self.request[OWNER_ID_FIELD])
 
     @property
+    def category(self):
+        return int(self.request[CATEGORY_FIELD])
+
+    @property
+    def subcategory(self):
+        return int(self.request[SUBCATEGORY_FIELD])
+
+    @property
     def images(self):
         result = []
         if(self.request[IMAGES_FIELD] != ""):
@@ -131,14 +139,6 @@ class Request(object):
                 result.append(REQUESTS_IMAGES_FOLDER + "/" + image)
 
         return result
-
-    @property
-    def category(self):
-        return int(self.request[CATEGORY_FIELD])
-
-    @property
-    def subcategory(self):
-        return int(self.request[SUBCATEGORY_FIELD])
 
     def __str__(self):
         return REQUEST_OBJECT_NAME

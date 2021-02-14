@@ -4,6 +4,7 @@ from utilities.queries import Queries, OFFERS_TABLE, REQUESTS_TABLE, MATCH_FIELD
 from utilities.utilities import get_image_from_url
 from utilities.configParser import ConfigParser
 from utilities.httpService import HttpService
+from utilities.tavilliAPI import TavilliAPI
 
 from config.config import DATABASE_HOST, DATABASE_USERNAME, DATEBASE_PASSWORD, DATABASE_NAME, RETRO_MATCHES_ROUTE, API_HOST
 
@@ -256,10 +257,11 @@ class WebServerHandler(BaseHTTPRequestHandler):
             if requests is None or len(requests) != 1:
                 return self.notFoundResponse()
             # Search matches for request
-            request = requests[0]
+            request = Request(requests[0])
             try:
                 matches = self.matcher.search_matches_for_request(request)
-                self.okResponse("hi")
+                response = TavilliAPI.requestMatchesResponse(request, matches)
+                self.successResponse(response)
             except Exception as e:
                 print("Error in newRequest route: {}".format(e))
                 self.internalErrResponse()
@@ -285,14 +287,17 @@ class WebServerHandler(BaseHTTPRequestHandler):
 # ----------- Responses -----------
         """
         Args:
-            message: stringify message
         Returns:
             VOID
         """
 
-    def okResponse(self, message=None):
-        self.send_response(code=200, message=message)
+    def successResponse(self, json_data=None):
+        self.send_response(200)
         self.sendJsonHeaders()
+        if json_data:
+            json_as_bytes = json.dumps(
+                json_data).encode('utf-8')
+            self.wfile.write(json_as_bytes)
 
     def badRequestResponse(self):
         self.send_response(400)
