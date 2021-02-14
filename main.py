@@ -58,7 +58,7 @@ class MainMatcher():
 
         request_data = TavilliAPI.newMatchesHttpRequest(matches)
         HttpService.post(API_HOST + RETRO_MATCHES_ROUTE,
-                         json_to_bytes(request_data))
+                         request_data)
 
     def search_matches_for_request(self, request):
         return self.search_matches(item=request, other_item_type=Offer,
