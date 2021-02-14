@@ -1,7 +1,7 @@
 from utilities.mySql import MySqlConnector
 from utilities.multiKeysDict import MultiKeysDict
 from utilities.queries import Queries, OFFERS_TABLE, REQUESTS_TABLE, MATCH_FIELDS, CATEGORY_FIELD, SUBCATEGORY_FIELD, Offer, Request, REQUEST_OBJECT_NAME, OFFER_OBJECT_NAME
-from utilities.utilities import get_image_from_url
+from utilities.utilities import get_image_from_url, json_to_bytes
 from utilities.configParser import ConfigParser
 from utilities.httpService import HttpService
 from utilities.tavilliAPI import TavilliAPI
@@ -57,9 +57,9 @@ class MainMatcher():
             matches = matches + self.search_matches_for_offer(offer)
         # Convert each result dict to json string (in order to have a unqiue key for "set" function) and remove duplications
         matches = set(
-            map(lambda match: json.dumps(match.__str__()), matches))
+            map(lambda match: json_to_bytes(match.__str__()), matches))
 
-        # HttpService.post(API_HOST + RETRO_MATCHES_ROUTE, matches)
+        HttpService.post(API_HOST + RETRO_MATCHES_ROUTE, matches)
 
     def search_matches_for_request(self, request):
         return self.search_matches(item=request, other_item_type=Offer,
@@ -275,6 +275,7 @@ class WebServerHandler(BaseHTTPRequestHandler):
 
 # ----------- Helpers -----------
 
+
     def parseJsonBody(self):
         content_length = int(self.headers['Content-Length'])
         body = self.rfile.read(content_length).decode('utf-8')
@@ -295,9 +296,7 @@ class WebServerHandler(BaseHTTPRequestHandler):
         self.send_response(200)
         self.sendJsonHeaders()
         if json_data:
-            json_as_bytes = json.dumps(
-                json_data).encode('utf-8')
-            self.wfile.write(json_as_bytes)
+            self.wfile.write(json_to_bytes(json_data))
 
     def badRequestResponse(self):
         self.send_response(400)
