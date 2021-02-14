@@ -260,7 +260,8 @@ class WebServerHandler(BaseHTTPRequestHandler):
             try:
                 matches = self.matcher.search_matches_for_request(request)
                 self.okResponse("hi")
-            except:
+            except Exception as e:
+                print("Error in newRequest route: {}".format(e))
                 self.internalErrResponse()
 
         elif route == "/newSupplierProduct":
