@@ -4,7 +4,7 @@ from utilities.queries import Queries, OFFERS_TABLE, REQUESTS_TABLE, MATCH_FIELD
 from utilities.utilities import get_image_from_url, json_to_bytes
 from utilities.configParser import ConfigParser
 from utilities.httpService import HttpService
-from utilities.tavilliAPI import TavilliAPI
+from utilities.tavilliAPI import TavilliAPI, API_MATCHES_FIELD
 
 from config.config import DATABASE_HOST, DATABASE_USERNAME, DATEBASE_PASSWORD, DATABASE_NAME, RETRO_MATCHES_ROUTE, API_HOST
 
@@ -55,11 +55,10 @@ class MainMatcher():
             matches = matches + self.search_matches_for_request(request)
         for offer in new_offers:
             matches = matches + self.search_matches_for_offer(offer)
-        # Convert each result dict to json string (in order to have a unqiue key for "set" function) and remove duplications
-        matches = set(
-            map(lambda match: json_to_bytes(match.__str__()), matches))
 
-        HttpService.post(API_HOST + RETRO_MATCHES_ROUTE, matches)
+        request_data = TavilliAPI.newMatchesHttpRequest(matches)
+        HttpService.post(API_HOST + RETRO_MATCHES_ROUTE,
+                         json_to_bytes(request_data))
 
     def search_matches_for_request(self, request):
         return self.search_matches(item=request, other_item_type=Offer,
