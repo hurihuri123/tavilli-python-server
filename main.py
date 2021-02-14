@@ -249,13 +249,14 @@ class WebServerHandler(BaseHTTPRequestHandler):
             # Extract request id from body
             request_id = body["requestId"]
             if request_id is None:
-                self.badRequestResponse()
+                return self.badRequestResponse()
             # Select request from DB
-            request = self.matcher.database.executeQuery(
+            requests = self.matcher.database.executeQuery(
                 Queries.getRequestById(request_id))
-            if request is None:
-                self.notFoundResponse()
+            if requests is None or len(requests) != 1:
+                return self.notFoundResponse()
             # Search matches for request
+            request = requests[0]
             try:
                 matches = self.matcher.search_matches_for_request(request)
                 self.okResponse("hi")
@@ -270,7 +271,6 @@ class WebServerHandler(BaseHTTPRequestHandler):
 
 
 # ----------- Helpers -----------
-
 
     def parseJsonBody(self):
         content_length = int(self.headers['Content-Length'])
