@@ -247,33 +247,34 @@ class WebServerHandler(BaseHTTPRequestHandler):
         body = self.parseJsonBody()
 
         if route == "/newRequest":
-            # Extract request id from body
-            request_id = body["requestId"]
-            if request_id is None:
-                return self.badRequestResponse()
-            # Select request from DB
-            requests = self.matcher.database.executeQuery(
-                Queries.getRequestById(request_id))
-            if requests is None or len(requests) != 1:
-                return self.notFoundResponse()
-            # Search matches for request
-            request = Request(requests[0])
-            try:
-                matches = self.matcher.search_matches_for_request(request)
-                response = TavilliAPI.requestMatchesResponse(request, matches)
-                self.successResponse(response)
-            except Exception as e:
-                print("Error in newRequest route: {}".format(e))
-                self.internalErrResponse()
-
+            self.handle_new_item(item_id=body["requestId"], object_type=Request,
+                                 select_query=Queries.getRequestById, search_matches_callback=self.matcher.search_matches_for_request)
         elif route == "/newSupplierProduct":
-            pass
+            self.handle_new_item(item_id=body["offerId"], object_type=Offer,
+                                 select_query=Queries.getOfferById, search_matches_callback=self.matcher.search_matches_for_offer)
         else:
             print("Receive new POST with unknown route")
             self.notFoundResponse()
 
+    def handle_new_item(self, item_id, object_type, select_query, search_matches_callback):
+        if item_id is None:
+            return self.badRequestResponse()
+        # Select request from DB
+        items = self.matcher.database.executeQuery(
+            select_query(item_id))
+        if items is None or len(items) != 1:
+            return self.notFoundResponse()
+        item = object_type(items[0])
+        # Search matches for item
+        try:
+            matches = search_matches_callback(item)
+            response = TavilliAPI.requestMatchesResponse(matches)
+            self.successResponse(response)
+        except Exception as e:
+            print("Error in handle new item: {}".format(e))
+            self.internalErrResponse()
 
-# ----------- Helpers -----------
+        # ----------- Helpers -----------
 
     def parseJsonBody(self):
         content_length = int(self.headers['Content-Length'])

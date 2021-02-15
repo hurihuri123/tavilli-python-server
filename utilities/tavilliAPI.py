@@ -35,9 +35,8 @@ class TavilliAPI():
         return {"data": result}
 
     @staticmethod
-    def requestMatchesResponse(request, matches):
+    def requestMatchesResponse(matches):
         result = {}
-        result[REQUEST_ID_FIELD] = request.id
         result[API_MATCHES_FIELD] = []
         for match in matches:
             result[API_MATCHES_FIELD].append(match.__str__())
