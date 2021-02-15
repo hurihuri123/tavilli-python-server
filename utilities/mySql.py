@@ -22,7 +22,9 @@ class MySqlConnector:
                 host=host,
                 user=user,
                 password=password,
-                database=database)
+                database=database,
+                autocommit=True  # Ensures that DB stay updated according to different source changes
+            )
             print("Connected successfully to DB")
             return conn
         except mysql.connector.Error as err:
