@@ -56,9 +56,10 @@ class MainMatcher():
         for offer in new_offers:
             matches = matches + self.search_matches_for_offer(offer)
 
-        request_data = TavilliAPI.newMatchesHttpRequest(matches)
-        HttpService.post(API_HOST + RETRO_MATCHES_ROUTE,
-                         request_data)
+        if len(matches) > 0:
+            request_data = TavilliAPI.newMatchesHttpRequest(matches)
+            HttpService.post(API_HOST + RETRO_MATCHES_ROUTE,
+                             request_data)
 
     def search_matches_for_request(self, request):
         return self.search_matches(item=request, other_item_type=Offer,
@@ -273,7 +274,6 @@ class WebServerHandler(BaseHTTPRequestHandler):
 
 
 # ----------- Helpers -----------
-
 
     def parseJsonBody(self):
         content_length = int(self.headers['Content-Length'])
