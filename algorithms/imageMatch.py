@@ -70,8 +70,6 @@ class ImageMatch(FeatureExtractor):
 
     # Appending isn't an open becuase we uses a dict in order to load all objects at once
     def save_dataset(self, dataset, dataset_path, command_mode='w'):
-        print("printing dataset save")
-        self.print_dataset(dataset)
         dataset_dict = self.convert_dataset_to_dict(dataset)
         hkl.dump(dataset_dict, dataset_path, command_mode)
 
@@ -81,8 +79,6 @@ class ImageMatch(FeatureExtractor):
         else:
             dataset_dict = {}
         dataset = self.convert_dict_to_dataset(dataset_dict)
-        print("printing dataset load")
-        self.print_dataset(dataset)
         return dataset
 
     def new_dataset(self):
