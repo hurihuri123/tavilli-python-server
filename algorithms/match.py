@@ -33,7 +33,7 @@ class Match(object):
         match_percentage = None
         if self.images_distance:
             # If negative then zero
-            match_percentage = max(0, 1 - self.images_distance)
+            match_percentage = max(0, 1 - self.images_distance) * 100
 
         return match_percentage
 
