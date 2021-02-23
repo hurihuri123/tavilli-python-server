@@ -201,30 +201,3 @@ class ImageMatch(FeatureExtractor):
                 best_match = score
 
         return best_match
-
-
-DATASET_FILE_NAME = "dataset.hkl"
-
-dirname = os.path.dirname(__file__)
-images_dir = os.path.join(dirname, "testImages")
-TEMPORARY_IMAGE_DIR = images_dir
-
-
-def showImage(image_path, name="result-image"):
-    image = cv2.imread(os.path.join(images_dir, image_path))
-    image = cv2.resize(image, (600, 600))
-    cv2.imshow(name, image)
-
-
-if __name__ == "__main__":
-    image_matcher = ImageMatch()
-    if not os.path.isfile(DATASET_FILE_NAME):
-        image_matcher.save_dataset(images_dir, DATASET_FILE_NAME)
-    scores = image_matcher.search(
-        DATASET_FILE_NAME, os.path.join(images_dir, "images (61).jpg"))
-
-    print(scores)
-    for score in scores:
-        print("Match with {} perecentage {}".format(score[1], score[0]))
-        showImage(score[1])
-        cv2.waitKey(0)
