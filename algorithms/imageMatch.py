@@ -71,6 +71,11 @@ class ImageMatch(FeatureExtractor):
     # Appending isn't an open becuase we uses a dict in order to load all objects at once
     def save_dataset(self, dataset, dataset_path, command_mode='w'):
         dataset_dict = self.convert_dataset_to_dict(dataset)
+
+        dir_path = os.path.dirname(dataset_path)
+        if os.path.exists(dir_path) == False:
+            os.makedirs(dir_path)
+
         hkl.dump(dataset_dict, dataset_path, command_mode)
 
     def load_dataset(self, dataset_path):
