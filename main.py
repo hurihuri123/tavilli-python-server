@@ -15,7 +15,6 @@ from algorithms.match import Match
 from algorithms.imageMatch import ImageMatch
 
 from config.config import *
-from imutils.paths import list_images
 
 from PIL import Image
 import os

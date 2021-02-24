@@ -4,7 +4,7 @@ from tensorflow.keras.models import Model
 import numpy as np
 import os
 from PIL import Image
-from imutils.paths import list_images
+# from imutils.paths import list_images
 import ntpath
 from pathlib import Path
 import hickle as hkl
@@ -50,16 +50,16 @@ class FeatureExtractor:
         Returns:
             features dictonary
         """
-        features = {}
-        for img_path in list_images(source_dir):
-            # Extract Features
-            feature = self.extract(Image.open(img_path))
-            # Extract image name
-            image_name = os.path.basename(img_path)  # Extract name from path
-            # image_name = os.path.splitext(image_name)[0]  # Extract extention from name
-            # Save the Numpy array (.npy) on designated path
-            features[image_name] = feature
-        return features
+        # features = {}
+        # for img_path in list_images(source_dir):
+        #     # Extract Features
+        #     feature = self.extract(Image.open(img_path))
+        #     # Extract image name
+        #     image_name = os.path.basename(img_path)  # Extract name from path
+        #     # image_name = os.path.splitext(image_name)[0]  # Extract extention from name
+        #     # Save the Numpy array (.npy) on designated path
+        #     features[image_name] = feature
+        # return features
 
 
 class ImageMatch(FeatureExtractor):
