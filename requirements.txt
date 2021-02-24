@@ -1,5 +1,5 @@
 opencv_python==4.5.1.48
-tensorflow==2.4.1
+--no-cache-dir tensorflow==2.4.1
 imutils==0.5.4
 fuzzywuzzy==0.18.0
 numpy==1.19.5
