@@ -5,6 +5,6 @@ numpy==1.19.5
 hickle==4.0.4
 mysql-connector-python
 Pillow==8.1.0
-
+tensorflow==2.4.1
 
 
