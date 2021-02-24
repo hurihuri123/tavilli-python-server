@@ -43,7 +43,7 @@ class Match(object):
     @property
     def images(self):
         match_percentage = None
-        if self.images_distance:
+        if self.images_distance is not None:
             if self.images_distance > 1:  # Distance above 1 result with 0% match
                 match_percentage = 0
             elif self.images_distance >= 0.90:  # Distance 0.90 - 1 result with 80-85% match
