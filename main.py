@@ -1,26 +1,25 @@
-from utilities.mySql import MySqlConnector
-from utilities.multiKeysDict import MultiKeysDict
-from utilities.queries import Queries, OFFERS_TABLE, REQUESTS_TABLE, MATCH_FIELDS, CATEGORY_FIELD, SUBCATEGORY_FIELD, Offer, Request, REQUEST_OBJECT_NAME, OFFER_OBJECT_NAME
-from utilities.utilities import get_image_from_url, json_to_bytes
-from utilities.configParser import ConfigParser
-from utilities.httpService import HttpService
-from utilities.tavilliAPI import TavilliAPI, API_MATCHES_FIELD
-
-from config.config import DATABASE_HOST, DATABASE_USERNAME, DATEBASE_PASSWORD, DATABASE_NAME, RETRO_MATCHES_ROUTE, API_HOST
-
-from http.server import BaseHTTPRequestHandler, HTTPServer
-from services.httpServer import HttpServer
-
-from algorithms.match import Match
-from algorithms.imageMatch import ImageMatch
-
-from config.config import *
-
-from PIL import Image
-import os
-from pathlib import Path
-import numpy as np
 import json
+import numpy as np
+from pathlib import Path
+import os
+from PIL import Image
+import ssl
+if (not os.environ.get('PYTHONHTTPSVERIFY', '') and
+        getattr(ssl, '_create_unverified_context', None)):
+    ssl._create_default_https_context = ssl._create_unverified_context
+from config.config import *
+from algorithms.imageMatch import ImageMatch
+from algorithms.match import Match
+from services.httpServer import HttpServer
+from http.server import BaseHTTPRequestHandler, HTTPServer
+from config.config import DATABASE_HOST, DATABASE_USERNAME, DATEBASE_PASSWORD, DATABASE_NAME, RETRO_MATCHES_ROUTE, API_HOST
+from utilities.tavilliAPI import TavilliAPI, API_MATCHES_FIELD
+from utilities.httpService import HttpService
+from utilities.configParser import ConfigParser
+from utilities.utilities import get_image_from_url, json_to_bytes
+from utilities.queries import Queries, OFFERS_TABLE, REQUESTS_TABLE, MATCH_FIELDS, CATEGORY_FIELD, SUBCATEGORY_FIELD, Offer, Request, REQUEST_OBJECT_NAME, OFFER_OBJECT_NAME
+from utilities.multiKeysDict import MultiKeysDict
+from utilities.mySql import MySqlConnector
 
 
 # TODO: doc and change name
