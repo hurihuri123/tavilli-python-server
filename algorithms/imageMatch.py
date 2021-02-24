@@ -4,12 +4,12 @@ from tensorflow.keras.models import Model
 import numpy as np
 import os
 from PIL import Image
-# from imutils.paths import list_images
 import ntpath
 from pathlib import Path
 import hickle as hkl
 
-import cv2  # Temporary import (just for show)
+# from imutils.paths import list_images
+
 
 DATASET_FEATURES_INDEX = 0
 DATASET_IMAGE_NAME_INDEX = 1
