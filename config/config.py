@@ -1,5 +1,11 @@
+import sys
+try:
+    mode = sys.argv[1]
+except:
+    raise Exception('Please specify mode - <prod> or <dev>')
 
-if(True):
+
+if(mode != "prod"):
     DATABASE_HOST = "localhost"
     DATABASE_USERNAME = "root"
     DATEBASE_PASSWORD = ""
@@ -8,9 +14,9 @@ if(True):
     IMAGES_HOST = "http://localhost:8443"
     API_HOST = "http://localhost:8443"
 else:
-    DATABASE_HOST = "database-2.cxekfsj5gkic.eu-central-1.rds.amazonaws.com"
+    DATABASE_HOST = "tavillidb.cnudzl5zfgfo.us-east-2.rds.amazonaws.com"
     DATABASE_USERNAME = "admin"
-    DATEBASE_PASSWORD = "tavilI123"
+    DATEBASE_PASSWORD = "tavillI123"
     DATABASE_NAME = "tavilli"
 
     IMAGES_HOST = "https://prod-images.tavilli.co.il"
