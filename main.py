@@ -3,10 +3,9 @@ import numpy as np
 from pathlib import Path
 import os
 from PIL import Image
-import ssl
-if (not os.environ.get('PYTHONHTTPSVERIFY', '') and
-        getattr(ssl, '_create_unverified_context', None)):
-    ssl._create_default_https_context = ssl._create_unverified_context
+
+import utilities.sslCertificate
+
 from config.config import *
 from algorithms.imageMatch import ImageMatch
 from algorithms.match import Match
