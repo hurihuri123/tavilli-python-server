@@ -59,14 +59,14 @@ class Match(object):
                 match_percentage = self.convertImageDistanceToPercentage(
                     self.images_distance, 0.20, 0.50, 95, 100)
             else:
-                matchPercantage = 100  # Distance 0-0.20 result with 100% match
+                match_percentage = 100  # Distance 0-0.20 result with 100% match
 
         return match_percentage
 
     @property
     def matchPercantage(self):
         sum = 0
-        if(self.images):
+        if(self.images is not None):
             sum = sum + self.images
         return round_float_number(sum)
 
