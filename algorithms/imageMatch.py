@@ -9,7 +9,7 @@ from pathlib import Path
 import hickle as hkl
 
 # from imutils.paths import list_images
-
+os.environ['CUDA_VISIBLE_DEVICES'] = '-1'  # Always run on CPU
 
 DATASET_FEATURES_INDEX = 0
 DATASET_IMAGE_NAME_INDEX = 1
