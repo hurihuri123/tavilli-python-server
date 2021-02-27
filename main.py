@@ -11,7 +11,7 @@ from algorithms.imageMatch import ImageMatch
 from algorithms.match import Match
 from services.httpServer import HttpServer
 from http.server import BaseHTTPRequestHandler, HTTPServer
-from config.config import DATABASE_HOST, DATABASE_USERNAME, DATEBASE_PASSWORD, DATABASE_NAME, RETRO_MATCHES_ROUTE, API_HOST
+from config.config import DATABASE_HOST, DATABASE_USERNAME, DATEBASE_PASSWORD, DATABASE_NAME, RETRO_MATCHES_ROUTE, API_HOST, SERVICE_MAIL, SERVICE_MAIL_PASSWORD
 from utilities.tavilliAPI import TavilliAPI, API_MATCHES_FIELD
 from utilities.httpService import HttpService
 from utilities.configParser import ConfigParser
@@ -19,6 +19,9 @@ from utilities.utilities import get_image_from_url, json_to_bytes
 from utilities.queries import Queries, OFFERS_TABLE, REQUESTS_TABLE, MATCH_FIELDS, CATEGORY_FIELD, SUBCATEGORY_FIELD, Offer, Request, REQUEST_OBJECT_NAME, OFFER_OBJECT_NAME
 from utilities.multiKeysDict import MultiKeysDict
 from utilities.mySql import MySqlConnector
+from utilities.mailTemplates import *
+
+from services.mailService import MailService
 
 
 # TODO: doc and change name
@@ -238,14 +241,26 @@ class MainMatcher():
 
 class WebServerHandler(BaseHTTPRequestHandler):
     matcher = MainMatcher()
+    mailSender = MailService(SERVICE_MAIL, SERVICE_MAIL_PASSWORD)
 
     def do_POST(self):
         route = self.path
         body = self.parseJsonBody()
 
         if route == "/newRequest":
+            # Search for matches
             self.handle_new_item(item_id=body["requestId"], object_type=Request,
                                  select_query=Queries.getRequestById, search_matches_callback=self.matcher.search_matches_for_request)
+            # Notify relevent suppliers about new request
+            request_url = body["requestUrl"]
+            relevent_suppliers = body["mailTo"]
+            if request_url and relevent_suppliers:
+                for mail in relevent_suppliers:
+                    mailSender.send_email(
+                        destinationMail=mail, subject=NEW_RELEVENT_MAIL_TITLE, email_body=new_relevent_template(request_url))
+                print("Sent {} to relevent suppliers".format(
+                    len(relevent_suppliers)))  # TODO: Logger
+
         elif route == "/newSupplierProduct":
             self.handle_new_item(item_id=body["offerId"], object_type=Offer,
                                  select_query=Queries.getOfferById, search_matches_callback=self.matcher.search_matches_for_offer)
