@@ -194,9 +194,10 @@ class ImageMatch(FeatureExtractor):
         best_match = None
         for scores in matches_scores_list:
             score = self.find_images_best_match(images, scores)
-            if best_match is None:
-                best_match = score
-            elif score < best_match:
-                best_match = score
+            if score:
+                if best_match is None:
+                    best_match = score
+                elif score < best_match:
+                    best_match = score
 
         return best_match
