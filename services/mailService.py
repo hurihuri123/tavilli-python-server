@@ -28,16 +28,22 @@ class MailService:
         except Exception as e:  # replace this with the appropriate SMTPLib exception
             # Overwrite the stale connection object with a new one
             if attempts > 5:
-                raise Exception(e)  # Exit
+                print("sendTo error {}".format(e))
+                # TODO: logger error + alert
+                return
             self.connection = self.smtp_connect()
             self.send_email(destinationMail=destinationMail,
                             subject=subject, email_body=email_body, body_type=body_type, attempts=attempts + 1)
 
     def smtp_connect(self):
-        # Instantiate a connection object...
-        smtpObj = smtplib.SMTP('smtp.gmail.com', self.clientPortForServer)
-        smtpObj.ehlo()
-        smtpObj.starttls()
-        smtpObj.login(
-            self.sourceMail, password=self.sourceMailPassword)
+        smtpObj = None
+        try:
+            smtpObj = smtplib.SMTP('smtp.gmail.com', self.clientPortForServer)
+            smtpObj.ehlo()
+            smtpObj.starttls()
+            smtpObj.login(
+                self.sourceMail, password=self.sourceMailPassword)
+        except Exception as e:
+            print("SMTP Connect failed with {}".format(e))
+            # TODO: logger error + alert
         return smtpObj
