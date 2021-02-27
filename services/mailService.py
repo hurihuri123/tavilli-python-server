@@ -10,41 +10,34 @@ class MailService:
         self.sourceMail = sourceMail
         self.sourceMailPassword = sourceMailPassword
         self.clientPortForServer = 587
+        self.connection = self.smtp_connect()
 
-    def send_mail(self, server, destinationMail, subject, mailBody, body_type):
+    def send_email(self, destinationMail, subject, email_body, body_type="html", attempts=0):
         # Set source/destination mails
         msg = MIMEMultipart()
         msg['From'] = str('Tavilli <%s>' % (self.sourceMail))
         msg['To'] = destinationMail
-
         msg['Subject'] = subject
 
         # Set mail body
-        msg.attach(MIMEText(mailBody, body_type))
-
-        # Send the mail
+        msg.attach(MIMEText(email_body, body_type))
         text = msg.as_string()
 
-        server.sendmail(self.sourceMail, destinationMail, text)
-        print("Mail was successfully sent to %s" % destinationMail)
+        try:
+            self.connection.sendmail(self.sourceMail, destinationMail, text)
+        except Exception as e:  # replace this with the appropriate SMTPLib exception
+            # Overwrite the stale connection object with a new one
+            if attempts > 5:
+                raise Exception(e)  # Exit
+            self.connection = self.smtp_connect()
+            self.send_email(destinationMail=destinationMail,
+                            subject=subject, email_body=email_body, body_type=body_type, attempts=attempts + 1)
 
-    def send_mail_relevant_request(self, destinationMails, url):
-        server = smtplib.SMTP('smtp.gmail.com', self.clientPortForServer)
-        server.ehlo()
-        server.starttls()
-        server.ehlo()
-        server.login(self.sourceMail, self.sourceMailPassword)
-        html = u"""\
-				<html>
-				  <head></head>
-				  <body dir="rtl">
-					<p>היי !<br>
-					   מאז התחברותך האחרונה התפרסמו בקשות חדשות אשר רלוונטיות עבורך.  <br>
-					לחצ/י על <a href="%s">הקישור</a> הנ"ל לצפייה.
-					</p>
-				  </body>
-				</html>
-				""" % (url)
-        for mail in destinationMails:
-            self.send_mail(server, mail, "בקשות חדשות עבורך", html, "html")
-        server.quit()
+    def smtp_connect(self):
+        # Instantiate a connection object...
+        smtpObj = smtplib.SMTP('smtp.gmail.com', self.clientPortForServer)
+        smtpObj.ehlo()
+        smtpObj.starttls()
+        smtpObj.login(
+            self.sourceMail, password=self.sourceMailPassword)
+        return smtpObj
