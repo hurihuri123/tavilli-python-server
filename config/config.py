@@ -4,7 +4,6 @@ try:
 except:
     raise Exception('Please specify mode - <prod> or <dev>')
 
-
 if(mode != "prod"):
     DATABASE_HOST = "localhost"
     DATABASE_USERNAME = "root"
@@ -28,3 +27,6 @@ OFFERS_IMAGES_FOLDER = IMAGES_FOLDER + "/offers"
 REQUESTS_IMAGES_FOLDER = IMAGES_FOLDER + "/requests"
 
 RETRO_MATCHES_ROUTE = "/autoMatches/new"
+
+SERVICE_MAIL = "taviliservice2@gmail.com"
+SERVICE_MAIL_PASSWORD = "tavilI123"
