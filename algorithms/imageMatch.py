@@ -178,7 +178,8 @@ class ImageMatch(FeatureExtractor):
                     lowest_distance = score
             except:
                 # TODO critical log error should alert us and save somewhere
-                print("Critical Error - image name doesn't exists in matching result")
+                print(
+                    "Critical Error - image {} doesn't exists in dataset".format(image))
                 pass
         return lowest_distance
 
@@ -194,7 +195,7 @@ class ImageMatch(FeatureExtractor):
         best_match = None
         for scores in matches_scores_list:
             score = self.find_images_best_match(images, scores)
-            if score:
+            if score is not None:
                 if best_match is None:
                     best_match = score
                 elif score < best_match:
