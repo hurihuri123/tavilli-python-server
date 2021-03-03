@@ -16,6 +16,7 @@ CATEGORY_FIELD = "category"
 SUBCATEGORY_FIELD = "subCategory"
 AUTO_SUBMIT_FIELD = "autoSubmit"
 STATUS_FIELD = "status"
+LOCKED_FIELDS = "lockedFields"
 
 # Static values
 OPEN_STATUS = 1
@@ -24,6 +25,7 @@ OFFER_OBJECT_NAME = "offer"
 
 MATCH_FIELDS = "{},{},{},{},{},{},{},{}".format(
     DESCRIPTION_FIELD, OWNER_ID_FIELD, IMAGES_FIELD, TITLE_FIELD, PRICE_FIELD, ID_FIELD, CATEGORY_FIELD, SUBCATEGORY_FIELD)
+REQUEST_EXTRA_FIELDS = ",{}".format(LOCKED_FIELDS)
 
 
 class Queries():
@@ -62,8 +64,8 @@ class Queries():
                 category=CATEGORY_FIELD,
                 categoryValue=category_id, subcategory=SUBCATEGORY_FIELD, subcategoryValue=subcategory_id)
 
-        return "SELECT {matchFields} FROM {table} WHERE  {statusField} = {statusValue} {extraFilters} {orderBy}".format(
-            matchFields=MATCH_FIELDS, table=REQUESTS_TABLE, extraFilters=query_extra_filters, orderBy=query_orderby,
+        return "SELECT {matchFields}{requestExtraFields} FROM {table} WHERE  {statusField} = {statusValue} {extraFilters} {orderBy}".format(
+            matchFields=MATCH_FIELDS, requestExtraFields=REQUEST_EXTRA_FIELDS, table=REQUESTS_TABLE, extraFilters=query_extra_filters, orderBy=query_orderby,
             statusField=STATUS_FIELD, statusValue=status)
 
     @staticmethod
@@ -109,6 +111,10 @@ class Offer(object):
     def subcategory(self):
         return int(self.offer[SUBCATEGORY_FIELD])
 
+    @property
+    def price(self):
+        return int(self.offer[PRICE_FIELD])
+
     def __str__(self):
         return OFFER_OBJECT_NAME
 
@@ -144,6 +150,16 @@ class Request(object):
                 result.append(REQUESTS_IMAGES_FOLDER + "/" + image)
 
         return result
+
+    @property
+    def price(self):
+        if self.request[PRICE_FIELD]:
+            return int(self.request[PRICE_FIELD])
+        return None
+
+    @property
+    def locked_fields(self):
+        return self.request[LOCKED_FIELDS]
 
     def __str__(self):
         return REQUEST_OBJECT_NAME

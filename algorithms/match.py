@@ -1,7 +1,10 @@
 from algorithms.textMatch import calculateTextMatch
 from algorithms.imageMatch import ImageMatch
 from utilities.queries import *
-from utilities.utilities import round_float_number
+from utilities.utilities import round_float_number, distance_percentage
+
+
+MAX_PRICE_DISTANCE_PERCENTAGE = 50
 
 
 class Match(object):
@@ -17,7 +20,26 @@ class Match(object):
 
     @property
     def price(self):
-        return 100
+        """  
+        Calculate distance between request and offer price      
+        Args:
+        Returns:
+            price_distance: lower distance means better match
+        """
+        prices_distance = None
+
+        if self.offer.price is None:
+            pass
+        elif self.request.price is None or self.offer.price <= self.request.price:
+            prices_distance = 0
+        elif self.request.locked_fields is not None and PRICE_FIELD in self.request.locked_fields:
+            # Request price is locked which means price is final
+            pass
+        else:  # Request has an open price
+            prices_distance = distance_percentage(
+                self.offer.price, self.request.price)
+
+        return prices_distance
 
     @property
     def title(self):
@@ -66,8 +88,12 @@ class Match(object):
     @property
     def matchPercantage(self):
         sum = 0
-        if(self.images is not None):
+        if self.price is None or self.price > MAX_PRICE_DISTANCE_PERCENTAGE:
+            return sum
+        if self.images is not None:
             sum = sum + self.images
+        else:
+            sum = 100  # Temporary untill we filter by description+title
         return round_float_number(sum)
 
     def __str__(self):
