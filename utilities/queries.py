@@ -1,5 +1,7 @@
 
 
+import functools
+
 from config.config import DATABASE_NAME, OFFERS_IMAGES_FOLDER, REQUESTS_IMAGES_FOLDER
 # Tables
 OFFERS_TABLE = "offers"
@@ -93,6 +95,7 @@ class Offer(object):
         return int(self.offer[OWNER_ID_FIELD])
 
     @property
+    @functools.lru_cache()
     def images(self):
         result = []
         if(self.offer[IMAGES_FIELD] != ""):
@@ -141,6 +144,7 @@ class Request(object):
         return int(self.request[SUBCATEGORY_FIELD])
 
     @property
+    @functools.lru_cache()
     def images(self):
         result = []
         if(self.request[IMAGES_FIELD] != ""):

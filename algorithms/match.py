@@ -3,6 +3,7 @@ from algorithms.imageMatch import ImageMatch
 from utilities.queries import *
 from utilities.utilities import round_float_number, distance_percentage
 
+import functools
 
 MAX_PRICE_DISTANCE_PERCENTAGE = 50
 
@@ -14,11 +15,13 @@ class Match(object):
         self.images_distance = images_distance
 
     @property
+    @functools.lru_cache()
     def description(self):
         return calculateTextMatch(
             self.request[DESCRIPTION_FIELD], self.offer[DESCRIPTION_FIELD])
 
     @property
+    @functools.lru_cache()
     def price(self):
         """  
         Calculate distance between request and offer price      
@@ -42,6 +45,7 @@ class Match(object):
         return prices_distance
 
     @property
+    @functools.lru_cache()
     def title(self):
         return 100
 
@@ -63,6 +67,7 @@ class Match(object):
         return min_percentage + way_passed_percentage * (max_percentage - min_percentage)
 
     @property
+    @functools.lru_cache()
     def images(self):
         match_percentage = None
         if self.images_distance is not None:
@@ -86,6 +91,7 @@ class Match(object):
         return match_percentage
 
     @property
+    @functools.lru_cache()
     def matchPercantage(self):
         sum = 0
         if self.price is None or self.price > MAX_PRICE_DISTANCE_PERCENTAGE:
