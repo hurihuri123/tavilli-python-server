@@ -29,7 +29,7 @@ DATASET_FILE_EXTENTION = "hkl"
 
 CONFIG_LAST_REQUEST_ID_KEY = "lastRequestId"
 CONFIG_LAST_OFFER_ID_KEY = "lastOfferId"
-MIN_MATCH_RATE = 0
+MIN_MATCH_RATE = 75
 
 
 class MainMatcher():
