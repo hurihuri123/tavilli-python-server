@@ -13,6 +13,7 @@ def round_float_number(num):
 
 
 # Calculate how many percentage the bigger number is bigger than the lower number
+# NOTE: incase of modifying this function, must update Tavilli.client similar function located at helper.ts
 def distance_percentage(num1, num2):
     if num1 >= num2:
         big = num1
