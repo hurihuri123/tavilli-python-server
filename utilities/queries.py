@@ -19,6 +19,8 @@ SUBCATEGORY_FIELD = "subCategory"
 AUTO_SUBMIT_FIELD = "autoSubmit"
 STATUS_FIELD = "status"
 LOCKED_FIELDS = "lockedFields"
+EXTRA_FIELDS = "extraFields"
+MODEL_FIELD = "model"
 
 # Static values
 OPEN_STATUS = 1
@@ -27,7 +29,8 @@ OFFER_OBJECT_NAME = "offer"
 
 MATCH_FIELDS = "{},{},{},{},{},{},{},{}".format(
     DESCRIPTION_FIELD, OWNER_ID_FIELD, IMAGES_FIELD, TITLE_FIELD, PRICE_FIELD, ID_FIELD, CATEGORY_FIELD, SUBCATEGORY_FIELD)
-REQUEST_EXTRA_FIELDS = ",{}".format(LOCKED_FIELDS)
+REQUEST_EXTRA_FIELDS = ",{}".format(LOCKED_FIELDS, EXTRA_FIELDS)
+OFFER_EXTRA_FIELDS = ",{}".format(MODEL_FIELD, EXTRA_FIELDS)
 
 
 class Queries():
@@ -48,8 +51,8 @@ class Queries():
             query_extra_filters += "AND {images} != ''".format(
                 images=IMAGES_FIELD)
 
-        return "SELECT {matchFields} FROM {table} WHERE {statusField} = {statusValue} AND {autoSubmit} = {autoSubmitValue} {extraFilters} {orderBy}".format(
-            matchFields=MATCH_FIELDS, table=OFFERS_TABLE, statusField=STATUS_FIELD, statusValue=status, autoSubmit=AUTO_SUBMIT_FIELD,
+        return "SELECT {matchFields}{offerExtraFields} FROM {table} WHERE {statusField} = {statusValue} AND {autoSubmit} = {autoSubmitValue} {extraFilters} {orderBy}".format(
+            matchFields=MATCH_FIELDS, offerExtraFields=OFFER_EXTRA_FIELDS, table=OFFERS_TABLE, statusField=STATUS_FIELD, statusValue=status, autoSubmit=AUTO_SUBMIT_FIELD,
             autoSubmitValue=auto_submit, extraFilters=query_extra_filters, orderBy=query_orderby)
 
     @staticmethod
@@ -117,6 +120,10 @@ class Offer(object):
     @property
     def price(self):
         return int(self.offer[PRICE_FIELD])
+
+    @property
+    def model(self):
+        return self.offer[MODEL_FIELD]
 
     def __str__(self):
         return OFFER_OBJECT_NAME

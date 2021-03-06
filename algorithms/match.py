@@ -92,6 +92,16 @@ class Match(object):
 
     @property
     @functools.lru_cache()
+    def model(self):
+        is_model_match = None
+        if self.offer.model is None:
+            pass
+        else:
+            is_model_match =
+        return is_model_match
+
+    @property
+    @functools.lru_cache()
     def matchPercantage(self):
         sum = 0
         if self.price is None or self.price > MAX_PRICE_DISTANCE_PERCENTAGE:
