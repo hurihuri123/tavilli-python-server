@@ -92,6 +92,9 @@ class ImageMatch(FeatureExtractor):
         dataset[DATASET_FEATURES_INDEX].append(feature)
         dataset[DATASET_IMAGE_NAME_INDEX].append(img_path)
 
+    def delete_item_from_dataset(self, dataset, img_path):
+        pass
+
     def merge_datasets(self, dataset1, dataset2):
         (features1, img_paths1) = dataset1
         (features2, img_paths2) = dataset2

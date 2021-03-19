@@ -221,6 +221,23 @@ class MainMatcher():
                 category_dataset, category, subcategory)
         return category_dataset
 
+    def delete_item_images(self, item, items_directory_path):
+        if(len(item.images) > 0):
+            # Load dataset
+            dataset_path = os.path.join(items_directory_path, self.get_filename_from_category(
+                item.category, item.subcategory))
+            dataset = self.image_matcher.load_dataset(
+                dataset_path)
+
+            for image in item.images:
+                # Delete each image
+                self.image_matcher.delete_item_from_dataset(
+                    dataset=dataset, img_path=image)
+
+            # Save changes
+            self.image_matcher.save_dataset(
+                dataset=dataset, dataset_path=dataset_path)
+
     @ staticmethod
     def get_filename_from_category(category_id, subcategory_id):
         return "{}_{}.{}".format(category_id, subcategory_id, DATASET_FILE_EXTENTION)
@@ -264,6 +281,50 @@ class WebServerHandler(BaseHTTPRequestHandler):
         elif route == "/newSupplierProduct":
             self.handle_new_item(item_id=body["offerId"], object_type=Offer,
                                  select_query=Queries.getOfferById, search_matches_callback=self.matcher.search_matches_for_offer)
+        elif route == "/itemsDeleted":
+            items = body["items"]
+            if items is None or isinstance(items, list) == False:
+                return self.badRequestResponse()
+
+            for item in items:
+                if "type" not in item or "id" not in item:
+                    return self.badRequestResponse()
+                item_type = item["type"]
+                item_id = item["id"]
+
+                if item_type == REQUEST_OBJECT_NAME:
+                    # Perform delete of request object
+                    items = self.matcher.database.executeQuery(
+                        Queries.getRequestById(item_id))
+                    if items is None or len(items) != 1:
+                        return self.notFoundResponse()
+                    try:
+                        item = Request(items[0])
+                        self.matcher.delete_item_images(item=item,
+                                                        items_directory_path=self.matcher.requests_directory)
+                    except Exception as e:
+                        # TODO: log and alert
+                        print("Error in delete images of request: {}".format(e))
+                        self.internalErrResponse()
+
+                elif item_type == OFFER_OBJECT_NAME:
+                    # Perform delete of offer object
+                    items = self.matcher.database.executeQuery(
+                        Queries.getOfferById(item_id))
+                    if items is None or len(items) != 1:
+                        return self.notFoundResponse()
+                    try:
+                        item = Offer(items[0])
+                        self.matcher.delete_item_images(item=item,
+                                                        items_directory_path=self.matcher.offers_directory)
+                    except Exception as e:
+                        # TODO: log and alert
+                        print("Error in delete images of offer: {}".format(e))
+                        self.internalErrResponse()
+
+                else:
+                    return self.badRequestResponse()
+
         else:
             print("Receive new POST with unknown route")
             self.notFoundResponse()
@@ -276,9 +337,9 @@ class WebServerHandler(BaseHTTPRequestHandler):
             select_query(item_id))
         if items is None or len(items) != 1:
             return self.notFoundResponse()
-        item = object_type(items[0])
         # Search matches for item
         try:
+            item = object_type(items[0])
             matches = search_matches_callback(item)
             response = TavilliAPI.requestMatchesResponse(matches)
             self.successResponse(response)
