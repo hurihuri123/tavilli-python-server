@@ -93,7 +93,13 @@ class ImageMatch(FeatureExtractor):
         dataset[DATASET_IMAGE_NAME_INDEX].append(img_path)
 
     def delete_item_from_dataset(self, dataset, img_path):
-        pass
+        try:
+            index = dataset[DATASET_IMAGE_NAME_INDEX].index(img_path)
+            del dataset[DATASET_FEATURES_INDEX][index]
+            del dataset[DATASET_IMAGE_NAME_INDEX][index]
+        except ValueError:  # image not found
+            print(
+                "Error at delete image from dataset image: {} not found".format(img_path))
 
     def merge_datasets(self, dataset1, dataset2):
         (features1, img_paths1) = dataset1
