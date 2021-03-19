@@ -97,7 +97,7 @@ class Match(object):
         if self.offer.model is None:
             pass
         else:
-            is_model_match =
+            pass
         return is_model_match
 
     @property
@@ -108,8 +108,6 @@ class Match(object):
             return sum
         if self.images is not None:
             sum = sum + self.images
-        else:
-            sum = 100  # Temporary untill we filter by description+title
         return round_float_number(sum)
 
     def __str__(self):
