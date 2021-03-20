@@ -127,7 +127,7 @@ class Offer(object):
 
     @property
     def description(self):
-        return self.offer[DESCRIPTION_FIELD]
+        return self.offer[DESCRIPTION_FIELD] if self.offer[DESCRIPTION_FIELD] is not None else ""
 
     @property
     def title(self):
@@ -193,7 +193,7 @@ class Request(object):
 
     @property
     def description(self):
-        return self.request[DESCRIPTION_FIELD]
+        return self.request[DESCRIPTION_FIELD] if self.request[DESCRIPTION_FIELD] is not None else ""
 
     @property
     def title(self):
