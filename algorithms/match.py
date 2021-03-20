@@ -19,8 +19,19 @@ class Match(object):
     @property
     @functools.lru_cache()
     def textFields(self):
+        request_extra_fields_values = ""
+        for key, value in self.request.extraFields.items():
+            request_extra_fields_values += "{} ".format(value)
+
+        offer_extra_fields_values = ""
+        for key, value in self.offer.extraFields.items():
+            offer_extra_fields_values += "{} ".format(value)
+
         text_match = calculateTextMatch(
-            self.request[DESCRIPTION_FIELD], self.offer[DESCRIPTION_FIELD])
+            "{} {} {}".format(self.request.description,
+                              self.request.title, request_extra_fields_values),
+            "{} {} {}".format(self.offer.description, self.offer.title, offer_extra_fields_values))
+        return text_match
 
     @property
     @functools.lru_cache()

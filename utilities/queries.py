@@ -1,6 +1,7 @@
 
 
 import functools
+import json
 
 from config.config import DATABASE_NAME, OFFERS_IMAGES_FOLDER, REQUESTS_IMAGES_FOLDER
 # Tables
@@ -125,8 +126,19 @@ class Offer(object):
         return self.offer[MODEL_FIELD]
 
     @property
+    def description(self):
+        return self.offer[DESCRIPTION_FIELD]
+
+    @property
+    def title(self):
+        return self.offer[TITLE_FIELD]
+
+    @property
     def extraFields(self):
-        return self.offer[EXTRA_FIELDS]
+        extra_fields = {}
+        if self.offer[EXTRA_FIELDS] is not None:
+            extra_fields = json.loads(self.offer[EXTRA_FIELDS])
+        return extra_fields
 
     def __str__(self):
         return OFFER_OBJECT_NAME
@@ -180,8 +192,19 @@ class Request(object):
         return self.request[MODEL_FIELD]
 
     @property
+    def description(self):
+        return self.request[DESCRIPTION_FIELD]
+
+    @property
+    def title(self):
+        return self.request[TITLE_FIELD]
+
+    @property
     def extraFields(self):
-        return self.request[EXTRA_FIELDS]
+        extra_fields = {}
+        if self.request[EXTRA_FIELDS] is not None:
+            extra_fields = json.loads(self.request[EXTRA_FIELDS])
+        return extra_fields
 
     def __str__(self):
         return REQUEST_OBJECT_NAME
