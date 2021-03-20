@@ -118,7 +118,15 @@ class Match(object):
         # Set up match range according to fields priority
         (min_match_rate, max_match_rate) = self.getMatchRanges()
 
-        return round_float_number(self.textFields)
+        # Calculate match fields priority
+        if self.images is None:
+            match_result = self.textFields
+        elif self.model is None:
+            match_result = 0.6 * self.images + 0.4 * self.textFields
+        else:
+            match_result = 0.2 * self.images + 0.8 * self.textFields
+
+        return round_float_number(match_result)
 
     def getMatchRanges(self):
         min_match_rate = None
