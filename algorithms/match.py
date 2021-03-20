@@ -127,7 +127,9 @@ class Match(object):
             match_result = 0.2 * self.images + 0.8 * self.textFields
 
         if min_match_rate is not None and match_result < min_match_rate:
-            match_result = min_match_rate
+            # Calculate relative match result starting from min_match_rate
+            match_result = min_match_rate + \
+                (match_result / 100) * (100 - min_match_rate)
         elif max_match_rate is not None and match_result > max_match_rate:
             match_result = max_match_rate
 
