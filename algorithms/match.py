@@ -19,7 +19,7 @@ class Match(object):
     @property
     @functools.lru_cache()
     def textFields(self):
-        return calculateTextMatch(
+        text_match = calculateTextMatch(
             self.request[DESCRIPTION_FIELD], self.offer[DESCRIPTION_FIELD])
 
     @property
@@ -106,7 +106,8 @@ class Match(object):
 
         # Set up match range according to fields priority
         (min_match_rate, max_match_rate) = self.getMatchRanges()
-        return round_float_number(sum)
+
+        return round_float_number(self.textFields)
 
     def getMatchRanges(self):
         min_match_rate = None
