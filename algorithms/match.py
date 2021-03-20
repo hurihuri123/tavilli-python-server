@@ -126,6 +126,11 @@ class Match(object):
         else:
             match_result = 0.2 * self.images + 0.8 * self.textFields
 
+        if min_match_rate is not None and match_result < min_match_rate:
+            match_result = min_match_rate
+        elif max_match_rate is not None and match_result > max_match_rate:
+            match_result = max_match_rate
+
         return round_float_number(match_result)
 
     def getMatchRanges(self):
