@@ -6,6 +6,8 @@ from utilities.utilities import round_float_number, distance_percentage
 import functools
 
 MAX_PRICE_DISTANCE_PERCENTAGE = 50
+MIN_MATCH_RATE = 75
+NO_MATCH_PERCENTAGE = 0
 
 
 class Match(object):
@@ -16,7 +18,7 @@ class Match(object):
 
     @property
     @functools.lru_cache()
-    def description(self):
+    def textFields(self):
         return calculateTextMatch(
             self.request[DESCRIPTION_FIELD], self.offer[DESCRIPTION_FIELD])
 
@@ -43,11 +45,6 @@ class Match(object):
                 self.offer.price, self.request.price)
 
         return prices_distance
-
-    @property
-    @functools.lru_cache()
-    def title(self):
-        return 100
 
     """        
         Args:
@@ -94,21 +91,37 @@ class Match(object):
     @functools.lru_cache()
     def model(self):
         is_model_match = None
-        if self.offer.model is None:
+        if self.offer.model is None or self.request.model is None:
             pass
         else:
-            pass
+            is_model_match = True if calculateTextMatch(
+                self.request.model, self.offer.model) >= 70 else False
         return is_model_match
 
     @property
     @functools.lru_cache()
     def matchPercantage(self):
-        sum = 0
         if self.price is None or self.price > MAX_PRICE_DISTANCE_PERCENTAGE:
-            return sum
-        if self.images is not None:
-            sum = sum + self.images
+            return NO_MATCH_PERCENTAGE  # Price mistmatch
+
+        # Set up match range according to fields priority
+        (min_match_rate, max_match_rate) = self.getMatchRanges()
         return round_float_number(sum)
+
+    def getMatchRanges(self):
+        min_match_rate = None
+        max_match_rate = None
+
+        if self.model is None:
+            pass
+        elif self.model == False:
+            max_match_rate = 90
+        else:
+            min_match_rate = 90
+
+        if self.images is not None and self.images >= 90:
+            min_match_rate = MIN_MATCH_RATE
+        return (min_match_rate, max_match_rate)
 
     def __str__(self):
         return {"requestId": self.request.id, "offerId": self.offer.id, "percentage": self.matchPercantage, "priceDistance": self.price}

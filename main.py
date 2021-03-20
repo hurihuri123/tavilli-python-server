@@ -8,7 +8,7 @@ import utilities.sslCertificate
 
 from config.config import *
 from algorithms.imageMatch import ImageMatch
-from algorithms.match import Match
+from algorithms.match import Match, MIN_MATCH_RATE
 from services.httpServer import HttpServer
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from config.config import DATABASE_HOST, DATABASE_USERNAME, DATEBASE_PASSWORD, DATABASE_NAME, RETRO_MATCHES_ROUTE, API_HOST, SERVICE_MAIL, SERVICE_MAIL_PASSWORD
@@ -29,7 +29,6 @@ DATASET_FILE_EXTENTION = "hkl"
 
 CONFIG_LAST_REQUEST_ID_KEY = "lastRequestId"
 CONFIG_LAST_OFFER_ID_KEY = "lastOfferId"
-MIN_MATCH_RATE = 75
 
 
 class MainMatcher():
