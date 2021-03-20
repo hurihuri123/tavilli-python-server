@@ -302,11 +302,10 @@ class WebServerHandler(BaseHTTPRequestHandler):
                         item = Request(items[0])
                         self.matcher.delete_item_images(item=item,
                                                         items_directory_path=self.matcher.requests_directory)
-                        self.successResponse()
                     except Exception as e:
                         # TODO: log and alert
                         print("Error in delete images of request: {}".format(e))
-                        self.internalErrResponse()
+                        return self.internalErrResponse()
 
                 elif item_type == OFFER_OBJECT_NAME:
                     # Perform delete of offer object
@@ -318,14 +317,14 @@ class WebServerHandler(BaseHTTPRequestHandler):
                         item = Offer(items[0])
                         self.matcher.delete_item_images(item=item,
                                                         items_directory_path=self.matcher.offers_directory)
-                        self.successResponse()
                     except Exception as e:
                         # TODO: log and alert
                         print("Error in delete images of offer: {}".format(e))
-                        self.internalErrResponse()
+                        return self.internalErrResponse()
 
                 else:
                     return self.badRequestResponse()
+            self.successResponse()
 
         else:
             print("Receive new POST with unknown route")
