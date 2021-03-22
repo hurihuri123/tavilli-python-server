@@ -1,10 +1,11 @@
 import sys
-# try:
-#     mode = sys.argv[1]
-# except:
-#     raise Exception('Please specify mode - <prod> or <dev>')
 
-if(True):
+try:
+    mode = sys.argv[1]
+except:
+    raise Exception('Please specify mode - <prod> or <dev>')
+
+if(mode != "prod"):
     DATABASE_HOST = "localhost"
     DATABASE_USERNAME = "root"
     DATEBASE_PASSWORD = ""
