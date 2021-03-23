@@ -21,7 +21,7 @@ class WebServerHandler(BaseHTTPRequestHandler):
 
     @classmethod
     def post_start(cls):
-        LoggerService.debug("Initializing objects...")
+        LoggerService.info("Initializing objects...")
         cls.matcher = MatcherService()
         cls.mailSender = MailService(SERVICE_MAIL, SERVICE_MAIL_PASSWORD)
 
