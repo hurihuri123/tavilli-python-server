@@ -273,7 +273,7 @@ class WebServerHandler(BaseHTTPRequestHandler):
             relevent_suppliers = body["mailTo"]
             if request_url and relevent_suppliers:
                 for mail in relevent_suppliers:
-                    mailSender.send_email(
+                    self.mailSender.send_email(
                         destinationMail=mail, subject=NEW_RELEVENT_MAIL_TITLE, email_body=new_relevent_template(request_url))
                 LoggerService.debug("Sent {} to relevent suppliers".format(
                     len(relevent_suppliers)))
