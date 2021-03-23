@@ -14,6 +14,7 @@ from http.server import BaseHTTPRequestHandler, HTTPServer
 from config.config import DATABASE_HOST, DATABASE_USERNAME, DATEBASE_PASSWORD, DATABASE_NAME, RETRO_MATCHES_ROUTE, API_HOST, SERVICE_MAIL, SERVICE_MAIL_PASSWORD
 from utilities.tavilliAPI import TavilliAPI, API_MATCHES_FIELD
 from utilities.httpService import HttpService
+from services.loggerService import LoggerService
 from utilities.configParser import ConfigParser
 from utilities.utilities import get_image_from_url, json_to_bytes
 from utilities.queries import Queries, OFFERS_TABLE, REQUESTS_TABLE, MATCH_FIELDS, CATEGORY_FIELD, SUBCATEGORY_FIELD, Offer, Request, REQUEST_OBJECT_NAME, OFFER_OBJECT_NAME
@@ -274,8 +275,8 @@ class WebServerHandler(BaseHTTPRequestHandler):
                 for mail in relevent_suppliers:
                     mailSender.send_email(
                         destinationMail=mail, subject=NEW_RELEVENT_MAIL_TITLE, email_body=new_relevent_template(request_url))
-                print("Sent {} to relevent suppliers".format(
-                    len(relevent_suppliers)))  # TODO: Logger
+                LoggerService.debug("Sent {} to relevent suppliers".format(
+                    len(relevent_suppliers)))
 
         elif route == "/newSupplierProduct":
             self.handle_new_item(item_id=body["offerId"], object_type=Offer,
@@ -302,8 +303,8 @@ class WebServerHandler(BaseHTTPRequestHandler):
                         self.matcher.delete_item_images(item=item,
                                                         items_directory_path=self.matcher.requests_directory)
                     except Exception as e:
-                        # TODO: log and alert
-                        print("Error in delete images of request: {}".format(e))
+                        LoggerService.error(
+                            "Error in delete images of request: {}".format(e))
                         return self.internalErrResponse()
 
                 elif item_type == OFFER_OBJECT_NAME:
@@ -317,8 +318,8 @@ class WebServerHandler(BaseHTTPRequestHandler):
                         self.matcher.delete_item_images(item=item,
                                                         items_directory_path=self.matcher.offers_directory)
                     except Exception as e:
-                        # TODO: log and alert
-                        print("Error in delete images of offer: {}".format(e))
+                        LoggerService.error(
+                            "Error in delete images of offer: {}".format(e))
                         return self.internalErrResponse()
 
                 else:
@@ -326,7 +327,7 @@ class WebServerHandler(BaseHTTPRequestHandler):
             self.successResponse()
 
         else:
-            print("Receive new POST with unknown route")
+            LoggerService.debug("Receive new POST with unknown route")
             self.notFoundResponse()
 
     def handle_new_item(self, item_id, object_type, select_query, search_matches_callback):
@@ -344,7 +345,7 @@ class WebServerHandler(BaseHTTPRequestHandler):
             response = TavilliAPI.requestMatchesResponse(matches)
             self.successResponse(response)
         except Exception as e:
-            print("Error in handle new item: {}".format(e))
+            LoggerService.error("Error in handle new item: {}".format(e))
             self.internalErrResponse()
 
         # ----------- Helpers -----------

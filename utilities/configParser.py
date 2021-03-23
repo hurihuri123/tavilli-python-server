@@ -1,6 +1,8 @@
 import json
 import os
 
+from services.loggerService import LoggerService
+
 CONFIG_FILE_NAME = "config.json"
 
 
@@ -15,7 +17,7 @@ class ConfigParser(object):
                 config = json.load(f)
                 value = config[key]
         except:
-            print("Error reading value from config file")
+            LoggerService.error("Error reading value from config file")
         finally:
             return value
 
@@ -35,5 +37,5 @@ class ConfigParser(object):
                     json.dump(config, f)
             return True
         except:
-            print("Error writing value to config file")
+            LoggerService.error("Error writing value to config file")
             return False

@@ -1,6 +1,8 @@
 import mysql.connector
 from mysql.connector import errorcode
 
+from services.loggerService import LoggerService
+
 
 def convertQueryResultToDict(queryResult, description):
     column_names = [col[0] for col in description]
@@ -25,7 +27,7 @@ class MySqlConnector:
                 database=database,
                 autocommit=True  # Ensures that DB stay updated according to different source changes
             )
-            print("Connected successfully to DB")
+            LoggerService.info("Connected successfully to DB")
             return conn
         except mysql.connector.Error as err:
             if err.errno == errorcode.ER_ACCESS_DENIED_ERROR:

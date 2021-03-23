@@ -4,6 +4,8 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.base import MIMEBase
 from email import encoders
 
+from services.loggerService import LoggerService
+
 
 class MailService:
     def __init__(self, sourceMail, sourceMailPassword):
@@ -28,8 +30,7 @@ class MailService:
         except Exception as e:  # replace this with the appropriate SMTPLib exception
             # Overwrite the stale connection object with a new one
             if attempts > 5:
-                print("sendTo error {}".format(e))
-                # TODO: logger error + alert
+                LoggerService.error("sendTo error {}".format(e))
                 return
             self.connection = self.smtp_connect()
             self.send_email(destinationMail=destinationMail,
@@ -44,6 +45,5 @@ class MailService:
             smtpObj.login(
                 self.sourceMail, password=self.sourceMailPassword)
         except Exception as e:
-            print("SMTP Connect failed with {}".format(e))
-            # TODO: logger error + alert
+            LoggerService.error("SMTP Connect failed with {}".format(e))
         return smtpObj

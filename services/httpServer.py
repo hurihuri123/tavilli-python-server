@@ -1,5 +1,7 @@
 from http.server import HTTPServer
 
+from services.loggerService import LoggerService
+
 
 class HttpServer(object):
     def __init__(self, web_server_handler):
@@ -9,8 +11,8 @@ class HttpServer(object):
     def listen(self, port):
         try:
             server = HTTPServer(('', port), self.web_server_handler)
-            print("Web server running on port %s" % port)
+            LoggerService.info("Web server running on port %s" % port)
             server.serve_forever()
         except KeyboardInterrupt:
-            print(" ^C entered stopping web server...")
+            LoggerService.info(" ^C entered stopping web server...")
             server.socket.close()

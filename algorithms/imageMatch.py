@@ -8,6 +8,7 @@ import ntpath
 from pathlib import Path
 import hickle as hkl
 
+from services.loggerService import LoggerService
 # from imutils.paths import list_images
 
 DATASET_FEATURES_INDEX = 0
@@ -30,7 +31,6 @@ class FeatureExtractor:
         Returns:
             feature (np.ndarray): deep feature with the shape=(4096, )
         """
-        print("Extracting feature for image")
         img = img.resize((224, 224))  # VGG must take a 224x224 img as an input
         img = img.convert('RGB')  # Make sure img is color
         # To np.array. Height x Width x Channel. dtype=float32
@@ -98,7 +98,7 @@ class ImageMatch(FeatureExtractor):
             del dataset[DATASET_FEATURES_INDEX][index]
             del dataset[DATASET_IMAGE_NAME_INDEX][index]
         except ValueError:  # image not found
-            print(
+            LoggerService.error(
                 "Error at delete image from dataset image: {} not found".format(img_path))
 
     def merge_datasets(self, dataset1, dataset2):
@@ -113,7 +113,7 @@ class ImageMatch(FeatureExtractor):
     def print_dataset(self, dataset):
         (features, img_paths) = dataset
         for img_path in img_paths:
-            print(img_path)
+            LoggerService.debug(img_path)
 
     def is_dataset_empty(self, dataset):
         if not dataset:
@@ -186,8 +186,7 @@ class ImageMatch(FeatureExtractor):
                 elif score < lowest_distance:
                     lowest_distance = score
             except:
-                # TODO critical log error should alert us and save somewhere
-                print(
+                LoggerService.error(
                     "Critical Error - image {} doesn't exists in dataset".format(image))
                 pass
         return lowest_distance
