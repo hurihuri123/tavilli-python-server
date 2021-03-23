@@ -16,8 +16,14 @@ from services.matcherService import MatcherService
 
 
 class WebServerHandler(BaseHTTPRequestHandler):
-    matcher = MatcherService()
-    mailSender = MailService(SERVICE_MAIL, SERVICE_MAIL_PASSWORD)
+    matcher = None
+    mailSender = None
+
+    @classmethod
+    def post_start(cls):
+        LoggerService.debug("Initializing objects...")
+        cls.matcher = MatcherService()
+        cls.mailSender = MailService(SERVICE_MAIL, SERVICE_MAIL_PASSWORD)
 
     def do_POST(self):
         route = self.path
