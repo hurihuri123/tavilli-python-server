@@ -16,6 +16,7 @@ from utilities.utilities import get_image_from_url, json_to_bytes
 from utilities.queries import Queries, OFFERS_TABLE, REQUESTS_TABLE, MATCH_FIELDS, CATEGORY_FIELD, SUBCATEGORY_FIELD, Offer, Request, REQUEST_OBJECT_NAME, OFFER_OBJECT_NAME
 from utilities.multiKeysDict import MultiKeysDict
 from utilities.mySql import MySqlConnector
+from utilities.datasetService import DatasetService
 
 
 DATASET_FILE_EXTENTION = "hkl"
@@ -101,7 +102,7 @@ class MatcherService():
                 image_features = self.image_matcher.extract(
                     img=Image.open(get_image_from_url(image)))
 
-                self.image_matcher.add_item_to_dataset(
+                DatasetService.add_item_to_dataset(
                     category_dataset, image_features, image)
                 # Mark that category has image
                 categories_with_images_ids.newItem(
@@ -118,12 +119,12 @@ class MatcherService():
                     category, subcategory)
                 dataset_path = os.path.join(items_directory_path, filename)
                 # Load existing stored dataset
-                dataset = self.image_matcher.load_dataset(dataset_path)
+                dataset = DatasetService.load_dataset(dataset_path)
                 # Append new features to dataset dict
-                dataset = self.image_matcher.merge_datasets(
+                dataset = DatasetService.merge_datasets(
                     dataset1=dataset, dataset2=category_dataset)
                 # Save changes to file
-                self.image_matcher.save_dataset(
+                DatasetService.save_dataset(
                     dataset, dataset_path)
 
         if len(new_items) > 0:
@@ -149,14 +150,14 @@ class MatcherService():
             compare_dataset_path = os.path.join(other_items_dir, self.get_filename_from_category(
                 item.category, item.subcategory))
 
-            same_type_dataset = self.image_matcher.load_dataset(
+            same_type_dataset = DatasetService.load_dataset(
                 same_type_dataset_path)
-            compare_dataset = self.image_matcher.load_dataset(
+            compare_dataset = DatasetService.load_dataset(
                 compare_dataset_path)
 
-            is_dataset_empty = self.image_matcher.is_dataset_empty(
+            is_dataset_empty = DatasetService.is_dataset_empty(
                 compare_dataset)
-            new_features_dataset = self.image_matcher.new_dataset()
+            new_features_dataset = DatasetService.new_dataset()
 
             for image in item_images:
                 image_features = self.image_matcher.find_feature_by_image_path(
@@ -167,7 +168,7 @@ class MatcherService():
                     image_features = self.image_matcher.extract(
                         img=Image.open(get_image_from_url(image)))
                     # Append new item to dataset
-                    self.image_matcher.add_item_to_dataset(
+                    DatasetService.add_item_to_dataset(
                         new_features_dataset, image_features, image)
 
                 if is_dataset_empty == False:
@@ -177,10 +178,10 @@ class MatcherService():
                     match_images_results.append(image_matches)
 
             # Append new features to their dataset
-            updated_dataset = self.image_matcher.merge_datasets(
+            updated_dataset = DatasetService.merge_datasets(
                 dataset1=same_type_dataset, dataset2=new_features_dataset)
             # Save changes to file
-            self.image_matcher.save_dataset(
+            DatasetService.save_dataset(
                 updated_dataset, same_type_dataset_path)
 
         matches = []
@@ -207,7 +208,7 @@ class MatcherService():
             category, subcategory)
         if category_dataset is None:
             # New empty category dataset
-            category_dataset = self.image_matcher.new_dataset()
+            category_dataset = DatasetService.new_dataset()
             categories_dataset.newItem(
                 category_dataset, category, subcategory)
         return category_dataset
@@ -217,16 +218,16 @@ class MatcherService():
             # Load dataset
             dataset_path = os.path.join(items_directory_path, self.get_filename_from_category(
                 item.category, item.subcategory))
-            dataset = self.image_matcher.load_dataset(
+            dataset = DatasetService.load_dataset(
                 dataset_path)
 
             for image in item.images:
                 # Delete each image
-                self.image_matcher.delete_item_from_dataset(
+                DatasetService.delete_item_from_dataset(
                     dataset=dataset, img_path=image)
 
             # Save changes
-            self.image_matcher.save_dataset(
+            DatasetService.save_dataset(
                 dataset=dataset, dataset_path=dataset_path)
 
     @ staticmethod
