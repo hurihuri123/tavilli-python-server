@@ -5,7 +5,9 @@ try:
 except:
     raise Exception('Please specify mode - <prod> or <dev>')
 
-if(mode != "prod"):
+IS_PRODUCTION = mode == "prod"
+
+if(IS_PRODUCTION == False):
     DATABASE_HOST = "localhost"
     DATABASE_USERNAME = "root"
     DATEBASE_PASSWORD = ""

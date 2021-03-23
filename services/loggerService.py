@@ -1,6 +1,9 @@
 import logging
 
-logging.basicConfig(level=logging.DEBUG)  # TODO: set level acocrding to ENV
+from config.config import IS_PRODUCTION
+
+logger_level = logging.INFO if IS_PRODUCTION else logging.DEBUG
+logging.basicConfig(level=logger_level)
 
 handle = "tavilli-python-server"
 logger = logging.getLogger(handle)
