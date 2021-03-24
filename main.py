@@ -10,7 +10,7 @@ from utilities.httpService import HttpService
 from services.loggerService import LoggerService
 from utilities.utilities import json_to_bytes
 from utilities.queries import Queries, OFFERS_TABLE, REQUESTS_TABLE, MATCH_FIELDS, CATEGORY_FIELD, SUBCATEGORY_FIELD, Offer, Request, REQUEST_OBJECT_NAME, OFFER_OBJECT_NAME
-from utilities.mailTemplates import *
+from utilities.mailTemplates import new_relevent_template, NEW_RELEVENT_MAIL_TITLE
 from services.mailService import MailService
 from services.matcherService import MatcherService
 
@@ -24,6 +24,8 @@ class WebServerHandler(BaseHTTPRequestHandler):
         LoggerService.info("Initializing objects...")
         cls.matcher = MatcherService()
         cls.mailSender = MailService(SERVICE_MAIL, SERVICE_MAIL_PASSWORD)
+        cls.mailSender.send_email(
+            destinationMail="danielhuri8@gmail.com", subject=NEW_RELEVENT_MAIL_TITLE, email_body=new_relevent_template("this-is-test"))
 
     def do_POST(self):
         route = self.path
