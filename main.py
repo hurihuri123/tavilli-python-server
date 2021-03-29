@@ -102,6 +102,9 @@ class WebServerHandler(BaseHTTPRequestHandler):
         items = self.matcher.database.executeQuery(
             select_query(item_id))
         if items is None or len(items) != 1:
+            print("Query is: {}".format(select_query(item_id)))
+            LoggerService.error(
+                "Item with ID {} was not found {}".format(item_id))
             return self.notFoundResponse()
         # Search matches for item
         try:
