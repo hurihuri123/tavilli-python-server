@@ -5,6 +5,8 @@ import json
 
 def get_image_from_url(url):
     r = requests.get(url)
+    print("image : {} , status code: {} , reason : {}, content is: {}".format(
+        url, r.status_code, r.reason, r.content))
     return BytesIO(r.content)
 
 
