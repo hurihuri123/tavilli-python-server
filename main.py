@@ -107,6 +107,7 @@ class WebServerHandler(BaseHTTPRequestHandler):
             all_items = self.matcher.database.executeQuery(
                 "SELECT id FROM offers")
             print("all items {}".format(all_items))
+            print("Query response is: {}".format(items))
             return self.notFoundResponse()
         # Search matches for item
         try:
