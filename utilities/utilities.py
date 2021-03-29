@@ -2,12 +2,12 @@ from io import BytesIO
 import requests
 import json
 
+from utilities.httpService import HttpService
+
 
 def get_image_from_url(url):
-    r = requests.get(url)
-    print("image : {} , status code: {} , reason : {}".format(
-        url, r.status_code, r.reason))
-    return BytesIO(r.content)
+    image_content = HttpService.get(url)
+    return BytesIO(image_content)
 
 
 def round_float_number(num):
