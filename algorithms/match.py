@@ -110,10 +110,22 @@ class Match(object):
         return is_model_match
 
     @property
+    def has_dealbreaker_fields(self):
+        # Variable Definition
+        result = True
+
+        # Code Section
+        if self.price is None or self.price > MAX_PRICE_DISTANCE_PERCENTAGE:
+            pass  # Price mistmatch
+        else:
+            result = False
+        return result
+
+    @property
     @functools.lru_cache()
     def matchPercantage(self):
-        if self.price is None or self.price > MAX_PRICE_DISTANCE_PERCENTAGE:
-            return NO_MATCH_PERCENTAGE  # Price mistmatch
+        if self.has_dealbreaker_fields:
+            return NO_MATCH_PERCENTAGE
 
         # Set up match range according to fields priority
         (min_match_rate, max_match_rate) = self.getMatchRanges()
