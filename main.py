@@ -99,12 +99,13 @@ class WebServerHandler(BaseHTTPRequestHandler):
     def handle_new_item(self, item_id, object_type, select_query, search_matches_callback):
         if item_id is None:
             return self.badRequestResponse()
-        # Select request from DB
+        # Select item from DB
         items = self.matcher.database.executeQuery(
             select_query(item_id))
         if items is None or len(items) != 1:
-            # Sleep and try reading item again - probably node's insert query changes aren't updated yet
-            time.sleep(2)
+            # Sleep and re-try selecting item - probably node's insert query changes aren't updated yet
+            # TODO: consider retriving item from HTTP request body
+            time.sleep(1)
             # Second read attempt
             items = self.matcher.database.executeQuery(
                 select_query(item_id))
