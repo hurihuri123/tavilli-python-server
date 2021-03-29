@@ -1,4 +1,5 @@
 import json
+import time  # Temporary
 
 import utilities.sslCertificate
 
@@ -104,10 +105,15 @@ class WebServerHandler(BaseHTTPRequestHandler):
         if items is None or len(items) != 1:
             LoggerService.error(
                 "Item with ID {} was not found".format(item_id))
-            all_items = self.matcher.database.executeQuery(
-                "SELECT id FROM offers")
-            print("all items {}".format(all_items))
+            # all_items = self.matcher.database.executeQuery(
+            #     "SELECT id FROM offers")
+            # print("all items {}".format(all_items))
             print("Query response is: {}".format(items))
+            time.sleep(3)
+            items = self.matcher.database.executeQuery(
+                select_query(item_id))
+            print("Query attempt 2 - response is: {}".format(items))
+
             return self.notFoundResponse()
         # Search matches for item
         try:
