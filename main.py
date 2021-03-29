@@ -100,6 +100,7 @@ class WebServerHandler(BaseHTTPRequestHandler):
         if item_id is None:
             return self.badRequestResponse()
         # Select request from DB
+        time.sleep(3)
         items = self.matcher.database.executeQuery(
             select_query(item_id))
         if items is None or len(items) != 1:
