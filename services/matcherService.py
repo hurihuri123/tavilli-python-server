@@ -99,8 +99,13 @@ class MatcherService():
 
             for image in item.images:
                 # Download image and extract it's features
-                image_features = self.image_matcher.extract(
-                    img=Image.open(get_image_from_url(image)))
+                try:
+                    image_features = self.image_matcher.extract(
+                        img=Image.open(get_image_from_url(image)))
+                except Exception as e:
+                    LoggerService.error(
+                        "Failed fetching url image {} to PIL object with error: {}".format(image, e))
+                    continue  # Continue to next image
 
                 DatasetService.add_item_to_dataset(
                     category_dataset, image_features, image)
@@ -165,8 +170,14 @@ class MatcherService():
 
                 if image_features is None:
                     # Download image and extract it's features
-                    image_features = self.image_matcher.extract(
-                        img=Image.open(get_image_from_url(image)))
+                    try:
+                        image_features = self.image_matcher.extract(
+                            img=Image.open(get_image_from_url(image)))
+                    except Exception as e:
+                        LoggerService.error(
+                            "Failed fetching url image: {} to PIL object with error: {}".format(image, e))
+                        continue  # Continue to next image
+
                     # Append new item to dataset
                     DatasetService.add_item_to_dataset(
                         new_features_dataset, image_features, image)
