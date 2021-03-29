@@ -1,5 +1,5 @@
 import json
-import time  # Temporary
+import time
 
 import utilities.sslCertificate
 
@@ -100,22 +100,18 @@ class WebServerHandler(BaseHTTPRequestHandler):
         if item_id is None:
             return self.badRequestResponse()
         # Select request from DB
-        time.sleep(3)
         items = self.matcher.database.executeQuery(
             select_query(item_id))
         if items is None or len(items) != 1:
-            LoggerService.error(
-                "Item with ID {} was not found".format(item_id))
-            # all_items = self.matcher.database.executeQuery(
-            #     "SELECT id FROM offers")
-            # print("all items {}".format(all_items))
-            print("Query response is: {}".format(items))
-            time.sleep(3)
+            # Sleep and try reading item again - probably node's insert query changes aren't updated yet
+            time.sleep(2)
+            # Second read attempt
             items = self.matcher.database.executeQuery(
                 select_query(item_id))
-            print("Query attempt 2 - response is: {}".format(items))
-
-            return self.notFoundResponse()
+            if items is None or len(items) != 1:
+                LoggerService.error(
+                    "Item with ID {} was not found".format(item_id))
+                return self.notFoundResponse()
         # Search matches for item
         try:
             item = object_type(items[0])
