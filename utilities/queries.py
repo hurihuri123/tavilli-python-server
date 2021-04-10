@@ -22,12 +22,15 @@ STATUS_FIELD = "status"
 LOCKED_FIELDS = "lockedFields"
 EXTRA_FIELDS = "extraFields"
 
+# Extra fields
+EXTRA_FIELD_MODEL = "MODEL"
+
 # Static values
 OPEN_STATUS = 1
 REQUEST_OBJECT_NAME = "request"
 OFFER_OBJECT_NAME = "offer"
 
-MATCH_FIELDS = "{},{},{},{},{},{},{},{},{},{}".format(
+MATCH_FIELDS = "{},{},{},{},{},{},{},{},{}".format(
     DESCRIPTION_FIELD, OWNER_ID_FIELD, IMAGES_FIELD, TITLE_FIELD, PRICE_FIELD, ID_FIELD, CATEGORY_FIELD, SUBCATEGORY_FIELD, EXTRA_FIELDS)
 REQUEST_EXTRA_FIELDS = ",{}".format(LOCKED_FIELDS)
 
@@ -129,6 +132,11 @@ class Offer(object):
         return self.offer[TITLE_FIELD]
 
     @property
+    def model(self):
+        return self.extraFields[EXTRA_FIELD_MODEL] if EXTRA_FIELD_MODEL in self.extraFields else None
+
+    @property
+    @functools.lru_cache()
     def extraFields(self):
         extra_fields = {}
         if self.offer[EXTRA_FIELDS] is not None:
@@ -183,6 +191,10 @@ class Request(object):
         return self.request[LOCKED_FIELDS]
 
     @property
+    def model(self):
+        return self.extraFields[EXTRA_FIELD_MODEL] if EXTRA_FIELD_MODEL in self.extraFields else None
+
+    @property
     def description(self):
         return self.request[DESCRIPTION_FIELD] if self.request[DESCRIPTION_FIELD] is not None else ""
 
@@ -191,6 +203,7 @@ class Request(object):
         return self.request[TITLE_FIELD]
 
     @property
+    @functools.lru_cache()
     def extraFields(self):
         extra_fields = {}
         if self.request[EXTRA_FIELDS] is not None:
