@@ -21,7 +21,6 @@ AUTO_SUBMIT_FIELD = "autoSubmit"
 STATUS_FIELD = "status"
 LOCKED_FIELDS = "lockedFields"
 EXTRA_FIELDS = "extraFields"
-MODEL_FIELD = "model"
 
 # Static values
 OPEN_STATUS = 1
@@ -29,7 +28,7 @@ REQUEST_OBJECT_NAME = "request"
 OFFER_OBJECT_NAME = "offer"
 
 MATCH_FIELDS = "{},{},{},{},{},{},{},{},{},{}".format(
-    DESCRIPTION_FIELD, OWNER_ID_FIELD, IMAGES_FIELD, TITLE_FIELD, PRICE_FIELD, ID_FIELD, CATEGORY_FIELD, SUBCATEGORY_FIELD, MODEL_FIELD, EXTRA_FIELDS)
+    DESCRIPTION_FIELD, OWNER_ID_FIELD, IMAGES_FIELD, TITLE_FIELD, PRICE_FIELD, ID_FIELD, CATEGORY_FIELD, SUBCATEGORY_FIELD, EXTRA_FIELDS)
 REQUEST_EXTRA_FIELDS = ",{}".format(LOCKED_FIELDS)
 
 
@@ -122,10 +121,6 @@ class Offer(object):
         return int(self.offer[PRICE_FIELD])
 
     @property
-    def model(self):
-        return self.offer[MODEL_FIELD]
-
-    @property
     def description(self):
         return self.offer[DESCRIPTION_FIELD] if self.offer[DESCRIPTION_FIELD] is not None else ""
 
@@ -186,10 +181,6 @@ class Request(object):
     @property
     def locked_fields(self):
         return self.request[LOCKED_FIELDS]
-
-    @property
-    def model(self):
-        return self.request[MODEL_FIELD]
 
     @property
     def description(self):
