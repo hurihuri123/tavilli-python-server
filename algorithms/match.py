@@ -8,6 +8,7 @@ import functools
 MAX_PRICE_DISTANCE_PERCENTAGE = 50
 MIN_MATCH_RATE = 75
 NO_MATCH_PERCENTAGE = 0
+MAX_DIMENSIONS_PERCENTAGE_DISTANCE = 30
 
 
 class Match(object):
@@ -110,13 +111,26 @@ class Match(object):
         return is_model_match
 
     @property
+    def dimensions(self):
+        is_dimensions_match = True
+        if self.offer.height is not None and self.request.height is not None and distance_percentage(self.offer.height, self.request.height) > MAX_DIMENSIONS_PERCENTAGE_DISTANCE:
+            is_dimensions_match = False
+        elif self.offer.width is not None and self.request.width is not None and distance_percentage(self.offer.width, self.request.width) > MAX_DIMENSIONS_PERCENTAGE_DISTANCE:
+            is_dimensions_match = False
+        elif self.offer.length is not None and self.request.length is not None and distance_percentage(self.offer.length, self.request.length) > MAX_DIMENSIONS_PERCENTAGE_DISTANCE:
+            is_dimensions_match = False
+        return is_dimensions_match
+
+    @property
     def has_dealbreaker_fields(self):
         # Variable Definition
         result = True
 
         # Code Section
         if self.price is None or self.price > MAX_PRICE_DISTANCE_PERCENTAGE:
-            pass  # Price mistmatch
+            pass  # Price mismatch
+        elif self.dimensions == False:
+            pass  # Dimensions mismatch
         else:
             result = False
         return result

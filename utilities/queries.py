@@ -24,6 +24,9 @@ EXTRA_FIELDS = "extraFields"
 
 # Extra fields
 EXTRA_FIELD_MODEL = "MODEL"
+EXTRA_FIELD_HEIGHT = "HEIGHT"
+EXTRA_FIELD_LENGTH = "LENGTH"
+EXTRA_FIELD_WIDTH = "WIDTH"
 
 # Static values
 OPEN_STATUS = 1
@@ -136,6 +139,18 @@ class Offer(object):
         return self.extraFields[EXTRA_FIELD_MODEL] if EXTRA_FIELD_MODEL in self.extraFields else None
 
     @property
+    def width(self):
+        return self.extraFields[EXTRA_FIELD_WIDTH] if EXTRA_FIELD_WIDTH in self.extraFields else None
+
+    @property
+    def height(self):
+        return self.extraFields[EXTRA_FIELD_HEIGHT] if EXTRA_FIELD_HEIGHT in self.extraFields else None
+
+    @property
+    def length(self):
+        return self.extraFields[EXTRA_FIELD_LENGTH] if EXTRA_FIELD_LENGTH in self.extraFields else None
+
+    @property
     @functools.lru_cache()
     def extraFields(self):
         extra_fields = {}
@@ -193,6 +208,18 @@ class Request(object):
     @property
     def model(self):
         return self.extraFields[EXTRA_FIELD_MODEL] if EXTRA_FIELD_MODEL in self.extraFields else None
+
+    @property
+    def width(self):
+        return self.extraFields[EXTRA_FIELD_WIDTH] if EXTRA_FIELD_WIDTH in self.extraFields else None
+
+    @property
+    def height(self):
+        return self.extraFields[EXTRA_FIELD_HEIGHT] if EXTRA_FIELD_HEIGHT in self.extraFields else None
+
+    @property
+    def length(self):
+        return self.extraFields[EXTRA_FIELD_LENGTH] if EXTRA_FIELD_LENGTH in self.extraFields else None
 
     @property
     def description(self):
