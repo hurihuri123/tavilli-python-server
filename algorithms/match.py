@@ -107,7 +107,7 @@ class Match(object):
             pass
         else:
             is_model_match = True if calculateTextMatch(
-                self.request.model, self.offer.model) >= 70 else False
+                self.request.model, self.offer.model) >= 100 else False
         return is_model_match
 
     @property
