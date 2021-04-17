@@ -159,7 +159,7 @@ class Match(object):
             match_result = max_match_rate
 
         print("request: {}, offer: {}, total match is: {}".format(
-            request.id, offer.id, round_float_number(match_result)))
+            self.request.id, self.offer.id, round_float_number(match_result)))
         return round_float_number(match_result)
 
     def getMatchRanges(self):
