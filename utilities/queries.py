@@ -74,8 +74,8 @@ class Queries():
                 category=CATEGORY_FIELD,
                 categoryValue=category_id, subcategory=SUBCATEGORY_FIELD, subcategoryValue=subcategory_id)
 
-        return "SELECT {matchFields}{requestExtraFields} FROM {table} WHERE  {statusField} = {statusValue} {extraFilters} {orderBy}".format(
-            matchFields=MATCH_FIELDS, requestExtraFields=REQUEST_EXTRA_FIELDS, table=REQUESTS_TABLE, extraFilters=query_extra_filters, orderBy=query_orderby,
+        return "SELECT {matchFields} FROM {table} WHERE  {statusField} = {statusValue} {extraFilters} {orderBy}".format(
+            matchFields=MATCH_FIELDS, table=REQUESTS_TABLE, extraFilters=query_extra_filters, orderBy=query_orderby,
             statusField=STATUS_FIELD, statusValue=status)
 
     @staticmethod

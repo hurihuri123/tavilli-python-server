@@ -49,9 +49,6 @@ class Match(object):
             pass
         elif self.request.price is None or self.offer.price <= self.request.price:
             prices_distance = 0
-        elif self.request.locked_fields is not None and PRICE_FIELD in self.request.locked_fields:
-            # Request price is locked which means price is final
-            pass
         else:  # Request has an open price
             prices_distance = distance_percentage(
                 self.offer.price, self.request.price)
