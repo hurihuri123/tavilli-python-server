@@ -16,6 +16,8 @@ class Match(object):
         self.request = request
         self.offer = offer
         self.images_distance = images_distance
+        print("request: {} , offer: {} ,image distance: {}".format(
+            request.id, offer.id, images_distance))
 
     @property
     @functools.lru_cache()
