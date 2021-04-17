@@ -158,6 +158,8 @@ class Match(object):
         elif max_match_rate is not None and match_result > max_match_rate:
             match_result = max_match_rate
 
+        print("request: {}, offer: {}, total match is: {}".format(
+            request.id, offer.id, round_float_number(match_result)))
         return round_float_number(match_result)
 
     def getMatchRanges(self):
