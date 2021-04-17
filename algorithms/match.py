@@ -173,7 +173,7 @@ class Match(object):
         else:
             min_match_rate = 90
 
-        if self.images is not None and self.images >= 90:
+        if self.images is not None and self.images >= 85:
             min_match_rate = MIN_MATCH_RATE
         return (min_match_rate, max_match_rate)
 
