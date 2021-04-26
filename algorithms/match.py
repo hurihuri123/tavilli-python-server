@@ -2,6 +2,7 @@ from algorithms.textMatch import calculateTextMatch
 from algorithms.imageMatch import ImageMatch
 from utilities.queries import *
 from utilities.utilities import round_float_number, distance_percentage
+from services.loggerService import LoggerService
 
 import functools
 
@@ -174,6 +175,8 @@ class Match(object):
 
         if self.images is not None and self.images >= 85:
             min_match_rate = MIN_MATCH_RATE
+        elif self.images is not None:
+            LoggerService.info("Request '{}' offer {} image match '{}'".format(self.request.id, self.offer.id, self.images))
         return (min_match_rate, max_match_rate)
 
     def __str__(self):
