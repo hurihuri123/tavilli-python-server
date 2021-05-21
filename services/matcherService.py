@@ -8,7 +8,7 @@ from config.config import *
 from algorithms.imageMatch import ImageMatch
 from algorithms.match import Match, MIN_MATCH_RATE
 from config.config import DATABASE_HOST, DATABASE_USERNAME, DATEBASE_PASSWORD, DATABASE_NAME, RETRO_MATCHES_ROUTE, API_HOST, SERVICE_MAIL, SERVICE_MAIL_PASSWORD
-from utilities.tavilliAPI import TavilliAPI, API_MATCHES_FIELD
+from utilities.tavilliAPI import TavilliAPI
 from utilities.httpService import HttpService
 from services.loggerService import LoggerService
 from utilities.configParser import ConfigParser

@@ -1,7 +1,10 @@
 from collections import defaultdict
 
-API_MATCHES_FIELD = "matches"
 REQUEST_ID_FIELD = "requestId"
+
+TAVILLI_API_SUCCESS_FIELD = "success"
+TAVILLI_API_MATCHES_FIELD = "matches"
+TAVILLI_API_ERROR_FIELD = "error"
 
 
 class TavilliAPI():
@@ -30,15 +33,14 @@ class TavilliAPI():
         for request_id, request_matches in group_by_request.items():
             item = {}
             item[REQUEST_ID_FIELD] = request_id
-            item[API_MATCHES_FIELD] = request_matches
+            item[TAVILLI_API_MATCHES_FIELD] = request_matches
             result.append(item)
         return {"data": result}
 
     @staticmethod
     def requestMatchesResponse(matches):
-        result = {}
-        result[API_MATCHES_FIELD] = []
+        mappedMatches = []
         for match in matches:
-            result[API_MATCHES_FIELD].append(match.__str__())
+            mappedMatches.append(match.__str__())
 
-        return result
+        return mappedMatches

@@ -1,12 +1,13 @@
 import json
 import time
+from http import HTTPStatus
 
 import utilities.sslCertificate
 
 from config.config import *
 from services.httpServer import HttpServer
 from http.server import BaseHTTPRequestHandler, HTTPServer
-from utilities.tavilliAPI import TavilliAPI, API_MATCHES_FIELD
+from utilities.tavilliAPI import TavilliAPI, TAVILLI_API_SUCCESS_FIELD, TAVILLI_API_ERROR_FIELD, TAVILLI_API_MATCHES_FIELD
 from utilities.httpService import HttpService
 from services.loggerService import LoggerService
 from utilities.utilities import json_to_bytes
@@ -31,9 +32,13 @@ class WebServerHandler(BaseHTTPRequestHandler):
         body = self.parseJsonBody()
 
         if route == "/newRequest":
+            if "requestId" not in body:
+                return self.badRequestResponse()
             # Search for matches
-            self.handle_new_item(item_id=body["requestId"], object_type=Request,
-                                 select_query=Queries.getRequestById, search_matches_callback=self.matcher.search_matches_for_request)
+            result = self.handle_new_item(item_id=body["requestId"], object_type=Request,
+                                          select_query=Queries.getRequestById, search_matches_callback=self.matcher.search_matches_for_request)
+            # Response format {success:boolean, matches:[], error:string|number}
+            self.successResponse(result)
             # Notify relevent suppliers about new request
             request_url = body["requestUrl"]
             relevent_suppliers = body["mailTo"]
@@ -44,14 +49,24 @@ class WebServerHandler(BaseHTTPRequestHandler):
                 LoggerService.debug("Sent {} to relevent suppliers".format(
                     len(relevent_suppliers)))
 
-        elif route == "/newSupplierProduct":
-            self.handle_new_item(item_id=body["offerId"], object_type=Offer,
-                                 select_query=Queries.getOfferById, search_matches_callback=self.matcher.search_matches_for_offer)
+        elif route == "/newSupplierProducts":
+            # Validate request params
+            if "offerIds" not in body or type(body["offerIds"]) != list:
+                return self.badRequestResponse()
+            offerIds = body["offerIds"]
+            # Search matches for each offer id
+            response = []
+            for offerId in offerIds:
+                response.append(self.handle_new_item(item_id=offerId, object_type=Offer,
+                                                     select_query=Queries.getOfferById, search_matches_callback=self.matcher.search_matches_for_offer))
+            # Response format is {success:boolean, matches:[], error:number}
+            self.successResponse(response)
+
         elif route == "/itemsDeleted":
-            items = body["items"]
-            if items is None or isinstance(items, list) == False:
+            if "items" not in body or isinstance(body["items"], list) == False:
                 return self.badRequestResponse()
 
+            items = body["items"]
             for item in items:
                 if "type" not in item or "id" not in item:
                     return self.badRequestResponse()
@@ -97,31 +112,38 @@ class WebServerHandler(BaseHTTPRequestHandler):
             self.notFoundResponse()
 
     def handle_new_item(self, item_id, object_type, select_query, search_matches_callback):
-        if item_id is None:
-            return self.badRequestResponse()
-        # Select item from DB
-        items = self.matcher.database.executeQuery(
-            select_query(item_id))
-        if items is None or len(items) != 1:
-            # Sleep and re-try selecting item - probably node's insert query changes aren't updated yet
-            # TODO: consider retriving item from HTTP request body
-            time.sleep(1)
-            # Second read attempt
+        retval = {TAVILLI_API_SUCCESS_FIELD: False,
+                  TAVILLI_API_MATCHES_FIELD: [], TAVILLI_API_ERROR_FIELD: None}
+        try:
+            if item_id is None:
+                raise Exception(HTTPStatus.BAD_REQUEST.value)
+            # Select item from DB
             items = self.matcher.database.executeQuery(
                 select_query(item_id))
             if items is None or len(items) != 1:
-                LoggerService.error(
-                    "Item with ID {} was not found".format(item_id))
-                return self.notFoundResponse()
-        # Search matches for item
-        try:
+                # Sleep and re-try selecting item - probably node's insert query changes aren't updated yet
+                # TODO: consider retriving item from HTTP request body
+                time.sleep(1)
+                # Second read attempt
+                items = self.matcher.database.executeQuery(
+                    select_query(item_id))
+                if items is None or len(items) != 1:
+                    LoggerService.error(
+                        "Item with ID {} was not found".format(item_id))
+                    raise Exception(HTTPStatus.NOT_FOUND.value)
+            # Search matches for item
             item = object_type(items[0])
             matches = search_matches_callback(item)
-            response = TavilliAPI.requestMatchesResponse(matches)
-            self.successResponse(response)
+            retval[TAVILLI_API_MATCHES_FIELD] = TavilliAPI.requestMatchesResponse(
+                matches)
+            retval[TAVILLI_API_SUCCESS_FIELD] = True
         except Exception as e:
-            LoggerService.error("Error in handle new item: {}".format(e))
-            self.internalErrResponse()
+            LoggerService.error(
+                "Error in handle new item with id:{} , {}".format(item_id, e))
+            retval[TAVILLI_API_ERROR_FIELD] = str(e)
+            retval[TAVILLI_API_SUCCESS_FIELD] = False
+        finally:
+            return retval
 
         # ----------- Helpers -----------
 
@@ -148,15 +170,15 @@ class WebServerHandler(BaseHTTPRequestHandler):
             self.wfile.write(json_to_bytes(json_data))
 
     def badRequestResponse(self):
-        self.send_response(400)
+        self.send_response(HTTPStatus.BAD_REQUEST.value)
         self.sendJsonHeaders()
 
     def notFoundResponse(self):
-        self.send_response(404)
+        self.send_response(HTTPStatus.NOT_FOUND.value)
         self.sendJsonHeaders()
 
     def internalErrResponse(self):
-        self.send_response(500)
+        self.send_response(HTTPStatus.INTERNAL_SERVER_ERROR.value)
         self.sendJsonHeaders()
 
 
