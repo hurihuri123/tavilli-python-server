@@ -81,9 +81,9 @@ class Match(object):
     def images(self):
         match_percentage = None
         if self.images_distance is not None:
-            if self.images_distance > 1:  # Distance above 1 result with 0% match
+            if self.images_distance > 1.15:  # Distance above 1 result with 0% match
                 match_percentage = 0
-            elif self.images_distance >= 0.90:  # Distance 0.90 - 1 result with 80-85% match
+            elif self.images_distance >= 0.90:  # Distance 0.90 - 1.15 result with 80-85% match
                 match_percentage = self.convertImageDistanceToPercentage(
                     self.images_distance, 0.90, 1, 80, 85)
             elif self.images_distance >= 0.70:  # Distance 0.70 - 0.90 result with 85-90% match
