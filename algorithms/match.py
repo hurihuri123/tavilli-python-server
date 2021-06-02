@@ -176,7 +176,8 @@ class Match(object):
         if self.images is not None and self.images >= 85:
             min_match_rate = MIN_MATCH_RATE
         elif self.images is not None:
-            LoggerService.info("Request '{}' offer '{}' image match '{}'".format(self.request.id, self.offer.id, self.images))
+            LoggerService.info("Request '{}' offer '{}' image match '{}' distance '{}'".format(
+                self.request.id, self.offer.id, self.images, self.images_distance))
         return (min_match_rate, max_match_rate)
 
     def __str__(self):
