@@ -15,8 +15,11 @@ class MySqlConnector:
         self.db_connection = self.createConnection(
             host, user, password, database)
         if self.db_connection:
-            self.cursor = self.db_connection.cursor(
-                buffered=True)  # cursor with access to the DB
+            self.setCursor(self.db_connection)
+
+    def setCursor(self, conn):
+        self.cursor = conn.cursor(
+            buffered=True)  # cursor with access to the DB
 
     def createConnection(self, host, user, password, database):
         try:
@@ -43,6 +46,15 @@ class MySqlConnector:
         self.db_connection.close()
 
     def executeQuery(self, query, toDict=True):
-        self.cursor.execute(query)
+        try:
+            self.cursor.execute(query)
+        except:
+            LoggerService.info("Connection error - attempting to reconnect")
+            # Whether it is a connection time out, or a network problem or the MySQL had to be restarted.
+            self.db_connection.ping(True)  # Ping and re-connect if needed
+            self.setCursor(self.db_connection)
+            # Try executing the query again
+            self.cursor.execute(query)
+
         result = self.cursor.fetchall()
         return convertQueryResultToDict(result, self.cursor.description) if toDict else result
